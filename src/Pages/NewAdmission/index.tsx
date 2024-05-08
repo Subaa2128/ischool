@@ -3,13 +3,7 @@ import { v4 } from "uuid";
 import "./NewAdmission.scss";
 import { ReactComponent as LeftArrow } from "../../assets/Icons/arrow-left-circle.svg";
 import Button from "../../Components/Button";
-import {
-  FieldArray,
-  Formik,
-  FormikErrors,
-  Form as FormikForm,
-  useFormikContext,
-} from "formik";
+import { FieldArray, Formik, FormikErrors, Form as FormikForm } from "formik";
 import TextField from "../../Components/TextField";
 import {
   addDoc,
@@ -178,7 +172,7 @@ const NewAdmission = () => {
     }));
     const filteredData = fetchedData.find((f) => f.id === id);
     setData(filteredData);
-  }, []);
+  }, [id]);
 
   useEffect(() => {
     getData();
