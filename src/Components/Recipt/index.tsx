@@ -26,7 +26,7 @@ const Recipt: React.FC<IRecipt> = ({ id }) => {
     }));
     const filteredData = fetchedData.find((f) => f.id === id);
     setData(filteredData);
-  }, []);
+  }, [id]);
 
   useEffect(() => {
     getData();

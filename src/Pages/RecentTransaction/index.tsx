@@ -107,7 +107,7 @@ const RecentTransaction = () => {
                 {filterSearch.length === 0 &&
                 filtersearchDateOfAdmission.length === 0 &&
                 filterGrade.length === 0
-                  ? data.map((f, i) => (
+                  ? currentData.map((f, i) => (
                       <tr key={i}>
                         <td>{f.admission.admissionNo}</td>
                         <td>JUNE16,2024</td>
