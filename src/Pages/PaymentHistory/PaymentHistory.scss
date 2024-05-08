@@ -1,0 +1,50 @@
+.payment-history-container {
+  padding: 64px;
+  .payment-history-wrapper {
+    margin-top: 100px;
+    .details {
+      margin-top: 63px;
+      // margin-left: 61px;
+      display: grid;
+      grid-template-columns: 0.5fr 1fr;
+      gap: 32px;
+
+      .history {
+        display: flex;
+        border: 1px solid var(--border-primary);
+        // justify-content: space-between;
+        flex-direction: column;
+        padding: 32px;
+        width: 100%;
+        .title {
+          display: flex;
+          justify-content: space-between;
+          padding-bottom: 32px;
+        }
+        table {
+          th {
+            text-align: left;
+            padding-bottom: 16px;
+            color: var(--text-secondary);
+            font-family: var(--font-light);
+            font-size: 14px;
+          }
+          td {
+            padding-top: 16px;
+            border-top: 1px solid var(--border-primary);
+            font-family: var(--font-bold);
+            color: #252525;
+
+            font-size: 16px;
+            input {
+              border: 1px solid var(--border-primary);
+              border-radius: 2px;
+              padding: 8px 16px;
+              width: 80%;
+            }
+          }
+        }
+      }
+    }
+  }
+}

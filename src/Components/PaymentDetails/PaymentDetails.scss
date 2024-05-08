@@ -1,0 +1,74 @@
+.payment-details-container {
+  width: 100%;
+  display: flex;
+  align-items: stretch;
+  .history {
+    display: flex;
+    border: 1px solid var(--border-primary);
+    justify-content: space-between;
+    flex-direction: column;
+    padding: 32px;
+    width: 100%;
+    .title {
+      display: flex;
+      justify-content: space-between;
+      padding-bottom: 32px;
+
+      h3 {
+        color: #252525 !important;
+        font-size: 20px;
+      }
+      h2 {
+        color: #455a64;
+      }
+    }
+    table {
+      width: 100%;
+      th {
+        text-align: center !important;
+        border-top: 1px solid #c7dce6;
+        border-bottom: 1px solid #c7dce6;
+        padding: 24px 0;
+        color: var(--text-secondary);
+        font-family: var(--font-light);
+        font-size: 14px;
+        &:nth-child(1) {
+          text-align: left !important;
+        }
+      }
+      .table-body {
+        .admission-fee {
+          .row {
+            color: #252525;
+            font-size: 16px;
+            text-align: center;
+            &:nth-child(1) {
+              text-align: left;
+            }
+          }
+        }
+        td {
+          padding-top: 16px;
+          border: none !important;
+          color: var(--text-secondary);
+          font-family: var(--font-medium) !important;
+          font-size: 16px;
+        }
+      }
+    }
+    .footer {
+      margin-top: 116px;
+      border-top: 1px solid var(--border-primary);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 32px;
+      .total,
+      .button {
+        display: flex;
+        align-items: center;
+        gap: 24px;
+      }
+    }
+  }
+}

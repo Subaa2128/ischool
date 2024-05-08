@@ -1,0 +1,80 @@
+.search-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: margin 0.3s ease; /* Add transition for smooth movement */
+}
+
+.search-box {
+  border: 1px solid var(--border-primary);
+
+  align-items: center;
+  gap: 8px;
+  display: flex;
+  width: 100%;
+  padding: 8px 12px;
+  input {
+    width: 100%;
+  }
+}
+
+.search-box-minimized {
+  width: 100%; /* Adjust as needed */
+}
+
+.filter-options {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  display: flex;
+  /* Your styling for filter options */
+  input {
+    border: 1px solid var(--border-primary);
+    padding: 8px 12px;
+    position: relative;
+  }
+  input[type="date"]::-webkit-calendar-picker-indicator {
+    background: transparent;
+    bottom: 0;
+    color: transparent;
+    cursor: pointer;
+    height: auto;
+    left: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: auto;
+    border: none;
+  }
+  .drop-down {
+    .value {
+      display: flex;
+      justify-content: space-between;
+      border: 1px solid var(--border-primary);
+      padding: 8px 12px;
+      position: relative;
+      width: 200px;
+    }
+    .option {
+      position: absolute;
+      border-radius: 2px;
+      border: 1px solid var(--border-primary);
+      background: #fff;
+      margin-top: 4px;
+      width: 200px;
+      height: 100%;
+      max-height: 150px;
+      overflow-y: auto;
+      p {
+        padding: 16px 24px;
+        text-align: left;
+        border-bottom: 1px solid #c7dce6;
+        cursor: pointer;
+      }
+    }
+  }
+}
+
+.open-filter {
+  margin-right: 30px; /* Adjust as needed */
+}
