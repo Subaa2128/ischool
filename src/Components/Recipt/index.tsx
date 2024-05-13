@@ -8,6 +8,8 @@ import { ReactComponent as Print } from "../../assets/Icons/printer.svg";
 import { INewAdmission } from "../../utils/types";
 import { collection, getDocs, query } from "firebase/firestore";
 import { db } from "../../utils/firebase";
+import moment from "moment";
+import numberToWords from "number-to-words";
 
 interface IRecipt {
   id?: string;
@@ -16,6 +18,19 @@ const Recipt: React.FC<IRecipt> = ({ id }) => {
   const divToPrintRef = useRef(null);
 
   const [data, setData] = useState<INewAdmission>();
+  const number =
+    Number(
+      data?.feeDetails.admisionFee.state
+        ? data?.feeDetails.admisionFee.amount
+        : 0
+    ) +
+    Number(
+      data?.feeDetails.schoolFee.state ? data?.feeDetails.schoolFee.amount : 0
+    ) +
+    Number(
+      data?.feeDetails.customFee.state ? data?.feeDetails.customFee.amount : 0
+    );
+  const words = numberToWords.toWords(number);
 
   const getData = useCallback(async () => {
     const q = query(collection(db, "NewAdmission"));
@@ -68,15 +83,16 @@ const Recipt: React.FC<IRecipt> = ({ id }) => {
             <div className="recipt-details">
               <div className="recipt-detail">
                 <p>Receipt No</p>
-                <h3>21456</h3>
+                <h3>{data?.feeDetails.reciptNo}</h3>
               </div>
               <div className="recipt-detail">
                 <p>Admission No</p>
                 <h3>{data?.admission.admissionNo}</h3>
               </div>
+
               <div className="recipt-detail">
                 <p>Date</p>
-                <h3>{data?.admission.DateOfAdmission}</h3>
+                <h3>{moment().format("MM-DD-YYYY")}</h3>
               </div>
               <div className="recipt-detail">
                 <p>Name</p>
@@ -93,28 +109,25 @@ const Recipt: React.FC<IRecipt> = ({ id }) => {
             </div>
             <div className="border"></div>
             <div className="admision-details">
-              <div className="detail">
-                <p>Admission fee</p>
-                <h3>5000.00</h3>
-              </div>
-              <div className="detail">
-                <p>School fee</p>
-                <h3>0.00</h3>
-              </div>
-              <div className="detail">
-                <p>Term1 fee</p>
-                <h3>6800.00</h3>
-              </div>
-              <div className="border"></div>
-              <div className="detail">
-                <p>Total</p>
-                <h3>11800.00</h3>
-              </div>
+              {data?.feeDetails.schoolFee.state && (
+                <div className="detail">
+                  <p>Admission fee</p>
+                  <h3>{data?.feeDetails.admisionFee.amount}.00</h3>
+                </div>
+              )}
+
+              {data?.feeDetails.schoolFee.state && (
+                <div className="detail">
+                  <p>School fee</p>
+                  <h3>{data?.feeDetails.schoolFee.amount}.00</h3>
+                </div>
+              )}
+
               <div className="border"></div>
             </div>
 
             <p>
-              In words <span>Eleven Thousand and Eight Hundred </span> only.
+              In words <span>{words} </span> only.
             </p>
             <div className="signature">
               <p>Signature of cashier</p>

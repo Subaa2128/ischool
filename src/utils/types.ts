@@ -61,7 +61,7 @@ export type INewAdmission = {
   ];
   previousStudy: {
     instituteName: string;
-    duration: string;
+    academicYear: string;
     class: string;
     medium: string;
     matric: string;
@@ -72,6 +72,25 @@ export type INewAdmission = {
     studentPhoto: string;
     birthCertificate: string;
     tenthMarksheet: string;
+  };
+  feeDetails: {
+    reciptNo?: string;
+    admisionFee: {
+      updatedDate: Date;
+      amount: string;
+      state: boolean;
+    };
+    schoolFee: {
+      updatedDate: Date;
+      amount: string;
+      state: boolean;
+    };
+    customFee: {
+      name: string;
+      amount: string;
+      state: boolean;
+      date: Date;
+    };
   };
   id?: string;
 };

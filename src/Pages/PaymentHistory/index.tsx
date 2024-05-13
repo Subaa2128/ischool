@@ -9,6 +9,7 @@ import { useNavigate, useParams } from "react-router-dom";
 // import { db } from "../../utils/firebase";
 // import { INewAdmission } from "../../utils/types";
 import Recipt from "../../Components/Recipt";
+import moment from "moment";
 
 const PaymentHistory = () => {
   const navigate = useNavigate();
@@ -49,6 +50,7 @@ const PaymentHistory = () => {
                 <PaymentDetails
                   setOpenRecipt={setOpenRecipt}
                   setOpenHistory={setOpenHistory}
+                  id={id}
                 />
               ) : (
                 <div className="history">
@@ -71,7 +73,7 @@ const PaymentHistory = () => {
                     <tbody>
                       <tr>
                         <td>2333</td>
-                        <td>JUNE16,2024</td>
+                        <td>{moment().format("MMM Do YY")}</td>
                         <td>2892</td>
 
                         <td

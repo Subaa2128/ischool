@@ -37,6 +37,8 @@ const NewAdmission = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const [data, setData] = useState<INewAdmission>();
+  const [feeAdmission, setFeeAdmission] = useState("");
+  const [schoolFee, setSchoolFee] = useState("");
   const [openAcademic, setOpenAcademic] = useState(false);
   const [openGrade, setOpenGrade] = useState(false);
   const [openGender, setOpenGender] = useState(false);
@@ -48,8 +50,23 @@ const NewAdmission = () => {
 
   const handleSubmit = async (values: typeof initialState) => {
     try {
+      console.log("new");
       console.log(values);
-      const data = await addDoc(collection(db, "NewAdmission"), { ...values });
+      const data = await addDoc(collection(db, "NewAdmission"), {
+        ...values,
+        feeDetails: {
+          admisionFee: {
+            updatedDate: Date.now(),
+            amount: feeAdmission,
+            state: false,
+          },
+          schoolFee: {
+            updatedDate: Date.now(),
+            amount: schoolFee,
+            state: false,
+          },
+        },
+      });
       navigate(`/paymenthistory/${data.id}`);
       console.log(data);
     } catch (error) {
@@ -180,9 +197,26 @@ const NewAdmission = () => {
 
   const handleUpdate = async (values: typeof initialState) => {
     try {
+      console.log("update");
       if (!id) return;
       const userDocRef = doc(db, "NewAdmission", id);
-      await updateDoc(userDocRef, { ...values });
+      await updateDoc(userDocRef, {
+        ...values,
+
+        ...data?.feeDetails,
+        admisionFee: {
+          // ...data?.feeDetails.admisionFee,
+          updatedDate: Date.now(),
+          amount: feeAdmission,
+          state: false,
+        },
+        schoolFee: {
+          // ...data?.feeDetails.schoolFee,
+          updatedDate: Date.now(),
+          amount: schoolFee,
+          state: false,
+        },
+      });
       navigate(-1);
     } catch (error) {
       console.log(error);
@@ -281,7 +315,7 @@ const NewAdmission = () => {
                 ],
             previousStudy: {
               instituteName: data ? data.previousStudy.instituteName : "",
-              duration: data ? data.previousStudy.duration : "",
+              academicYear: data ? data.previousStudy.academicYear : "",
               class: data ? data.previousStudy.class : "",
               medium: data ? data.previousStudy.medium : "",
               matric: data ? data.previousStudy.matric : "",
@@ -309,9 +343,9 @@ const NewAdmission = () => {
                   <Button
                     variant="primary"
                     type="submit"
-                    onClick={() =>
-                      data ? handleUpdate(values) : handleSubmit(values)
-                    }
+                    // onClick={() =>
+                    //   data ? handleUpdate(values) : handleSubmit(values)
+                    // }
                   >
                     Submit
                   </Button>
@@ -440,6 +474,8 @@ const NewAdmission = () => {
                                           option.value
                                         ); // Set the selected value in formik field
                                         setOpenGrade(false); // Close the dropdown after selection
+                                        setFeeAdmission(option.admissionFee);
+                                        setSchoolFee(option.schoolFees);
                                       }}
                                     >
                                       {option.label}
@@ -793,8 +829,8 @@ const NewAdmission = () => {
                               placeholder="instituteName"
                             />
                             <TextField
-                              name="previousStudy.duration"
-                              placeholder="duration"
+                              name="previousStudy.academicYear"
+                              placeholder="academicYear"
                             />
                             <div className="">
                               <TextField

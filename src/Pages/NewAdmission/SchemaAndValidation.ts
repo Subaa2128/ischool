@@ -140,7 +140,7 @@ export const initialState = {
   ],
   previousStudy: {
     instituteName: "",
-    duration: "",
+    academicYear: "",
     class: "",
     medium: "",
     matric: "",
