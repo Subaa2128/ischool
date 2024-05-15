@@ -39,6 +39,10 @@ const NewAdmission = () => {
   const [data, setData] = useState<INewAdmission>();
   const [feeAdmission, setFeeAdmission] = useState("");
   const [schoolFee, setSchoolFee] = useState("");
+  const [term1Fee, setTerm1Fee] = useState("");
+  const [term2Fee, setTerm2Fee] = useState("");
+  const [term3Fee, setTerm3Fee] = useState("");
+
   const [openAcademic, setOpenAcademic] = useState(false);
   const [openGrade, setOpenGrade] = useState(false);
   const [openGender, setOpenGender] = useState(false);
@@ -54,18 +58,43 @@ const NewAdmission = () => {
       console.log(values);
       const data = await addDoc(collection(db, "NewAdmission"), {
         ...values,
-        feeDetails: {
-          admisionFee: {
+        feeDetails: [
+          {
+            name: "admissionFee",
             updatedDate: Date.now(),
             amount: feeAdmission,
             state: false,
+            reciptNo: "",
           },
-          schoolFee: {
+          {
+            name: "schoolFee",
             updatedDate: Date.now(),
             amount: schoolFee,
             state: false,
+            reciptNo: "",
           },
-        },
+          {
+            name: "term1",
+            updatedDate: Date.now(),
+            amount: term1Fee,
+            state: false,
+            reciptNo: "",
+          },
+          {
+            name: "term2",
+            updatedDate: Date.now(),
+            amount: term2Fee,
+            state: false,
+            reciptNo: "",
+          },
+          {
+            name: "term3",
+            updatedDate: Date.now(),
+            amount: term3Fee,
+            state: false,
+            reciptNo: "",
+          },
+        ],
       });
       navigate(`/paymenthistory/${data.id}`);
       console.log(data);
@@ -203,19 +232,43 @@ const NewAdmission = () => {
       await updateDoc(userDocRef, {
         ...values,
 
-        ...data?.feeDetails,
-        admisionFee: {
-          // ...data?.feeDetails.admisionFee,
-          updatedDate: Date.now(),
-          amount: feeAdmission,
-          state: false,
-        },
-        schoolFee: {
-          // ...data?.feeDetails.schoolFee,
-          updatedDate: Date.now(),
-          amount: schoolFee,
-          state: false,
-        },
+        feeDetails: [
+          {
+            name: "admitionFee",
+            updatedDate: Date.now(),
+            amount: feeAdmission,
+            state: false,
+            reciptNo: "",
+          },
+          {
+            name: "schoolFee",
+            updatedDate: Date.now(),
+            amount: schoolFee,
+            state: false,
+            reciptNo: "",
+          },
+          {
+            name: "term1",
+            updatedDate: Date.now(),
+            amount: term1Fee,
+            state: false,
+            reciptNo: "",
+          },
+          {
+            name: "term2",
+            updatedDate: Date.now(),
+            amount: term2Fee,
+            state: false,
+            reciptNo: "",
+          },
+          {
+            name: "term3",
+            updatedDate: Date.now(),
+            amount: term3Fee,
+            state: false,
+            reciptNo: "",
+          },
+        ],
       });
       navigate(-1);
     } catch (error) {
@@ -340,13 +393,7 @@ const NewAdmission = () => {
                     onClick={() => navigate(-1)}
                     style={{ cursor: "pointer" }}
                   />
-                  <Button
-                    variant="primary"
-                    type="submit"
-                    // onClick={() =>
-                    //   data ? handleUpdate(values) : handleSubmit(values)
-                    // }
-                  >
+                  <Button variant="primary" type="submit">
                     Submit
                   </Button>
                 </div>
@@ -380,8 +427,8 @@ const NewAdmission = () => {
                       <p
                         key={i}
                         style={{
-                          background: selectedHeader === f ? "#777" : "none",
-                          color: selectedHeader === f ? "#fff" : "#777",
+                          background: selectedHeader === f ? "#455a64" : "none",
+                          color: selectedHeader === f ? "#fff" : "#455a64",
                           transition: "background 0.3s ease-in-out",
                           cursor: "pointer",
                           textTransform: "capitalize",
@@ -399,16 +446,19 @@ const NewAdmission = () => {
                         <div className="grid">
                           <div className="grid-one">
                             <TextField
+                              type="number"
                               id="admission.applicationNo"
                               name="admission.applicationNo"
                               placeholder="applicationNo"
                             />
                             <TextField
+                              type="number"
                               id="admission.admissionNo"
                               name="admission.admissionNo"
                               placeholder="admissionNo"
                             />
                             <TextField
+                              type="number"
                               name="admission.emisNo"
                               placeholder="emisNo"
                             />
@@ -476,6 +526,9 @@ const NewAdmission = () => {
                                         setOpenGrade(false); // Close the dropdown after selection
                                         setFeeAdmission(option.admissionFee);
                                         setSchoolFee(option.schoolFees);
+                                        setTerm1Fee(option.term1);
+                                        setTerm2Fee(option.term2);
+                                        setTerm3Fee(option.term3);
                                       }}
                                     >
                                       {option.label}
@@ -537,6 +590,7 @@ const NewAdmission = () => {
                               placeholder="dataOfBirthInWords"
                             />
                             <TextField
+                              type="number"
                               name="student.aadharCardNo"
                               placeholder="aadharCardNo"
                             />
@@ -633,6 +687,7 @@ const NewAdmission = () => {
                                 placeholder="dateOfBirth"
                               />
                               <TextField
+                                type="number"
                                 name="parent.fatherDetails.mobileNo"
                                 placeholder="mobileNo"
                               />
@@ -642,6 +697,7 @@ const NewAdmission = () => {
                               />
 
                               <TextField
+                                type="number"
                                 name="parent.fatherDetails.aadarNo"
                                 placeholder="aadarNo"
                               />
@@ -654,6 +710,7 @@ const NewAdmission = () => {
                                 placeholder="occupation"
                               />
                               <TextField
+                                type="number"
                                 name="parent.fatherDetails.annualIncome"
                                 placeholder="annualIncome"
                               />
@@ -673,6 +730,7 @@ const NewAdmission = () => {
                                 placeholder="dateOfBirth"
                               />
                               <TextField
+                                type="number"
                                 name="parent.motherDetails.mobileNo"
                                 placeholder="mobileNo"
                               />
@@ -682,6 +740,7 @@ const NewAdmission = () => {
                               />
 
                               <TextField
+                                type="number"
                                 name="parent.motherDetails.aadarNo"
                                 placeholder="aadarNo"
                               />
@@ -694,6 +753,7 @@ const NewAdmission = () => {
                                 placeholder="occupation"
                               />
                               <TextField
+                                type="number"
                                 name="parent.motherDetails.annualIncome"
                                 placeholder="annualIncome"
                               />

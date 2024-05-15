@@ -44,11 +44,11 @@
   --button-secondary: #c22828;
 
   --border-primary: #c7dce6;
-  --border-secondary: #777;
+  --border-secondary: #455a64;
   --border-tertiary: #aaa;
 
-  --text-primary: #aaa;
-  --text-secondary: #777;
+  --text-primary: #455a64;
+  --text-secondary: #455a64;
   --text-tertiary: #fff;
   --text-highlight: #555;
   --text-error: #c22828;
@@ -100,7 +100,7 @@ h3 {
   line-height: normal;
 }
 p {
-  color: #777;
+  color: var(--text-primary);
 
   text-align: center;
   // font-family: Gilroy;

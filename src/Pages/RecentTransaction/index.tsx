@@ -8,17 +8,24 @@ import { collection, getDocs, query } from "firebase/firestore";
 import { db } from "../../utils/firebase";
 import { INewAdmission } from "../../utils/types";
 import { useNavigate } from "react-router-dom";
+import moment from "moment";
+import { toHaveAttribute } from "@testing-library/jest-dom/matchers";
+import { array } from "yup";
 
 const EntriesPerPage = 10;
 
 const RecentTransaction = () => {
   const navigate = useNavigate();
   const [data, setData] = useState<INewAdmission[]>([]);
+  const [filterData, setFilterData] = useState<INewAdmission[]>([]);
+
   const [selectGrade, setSelectGrade] = useState("");
   const [openGrade, setOpenGrade] = useState(false);
   const [searchDateOfAdmission, setSearchDateOfSubmision] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [searchData, setSearchData] = useState("");
+  const [selectFee, setSelectFee] = useState("");
+  const [openFee, setOpenFee] = useState(false);
 
   const onPageChange = (pageNumber: React.SetStateAction<number>) => {
     setCurrentPage(pageNumber);
@@ -41,9 +48,13 @@ const RecentTransaction = () => {
     return pages;
   };
 
-  const startIndex = (currentPage - 1) * EntriesPerPage;
-  const endIndex = startIndex + EntriesPerPage;
-  const currentData = data.slice(startIndex, endIndex);
+  // const startIndex = (currentPage - 1) * EntriesPerPage;
+  // const endIndex = startIndex + EntriesPerPage;
+  // const currentData =
+  //   filterData.length !== 0
+  //     ? filterData.slice(startIndex, endIndex)
+  //     : data.slice(startIndex, endIndex);
+
   const getData = useCallback(async () => {
     const q = query(collection(db, "NewAdmission"));
     const querySnapshot = await getDocs(q);
@@ -51,6 +62,15 @@ const RecentTransaction = () => {
       id: doc.id,
       ...(doc.data() as Omit<INewAdmission, "id">),
     }));
+    // const filterredData = fetchedData.filter(
+    //   (s) => s.feeDetails.admisionFee.state === true
+    // );
+    // const sortData = filterredData.sort((a, b) => {
+    //   const timeA: any = new Date(a.feeDetails.admisionFee.updatedDate);
+    //   const timeB: any = new Date(b.feeDetails.admisionFee.updatedDate);
+    //   return timeB - timeA;
+    // });
+    console.log(fetchedData);
     setData(fetchedData);
   }, []);
 
@@ -58,16 +78,46 @@ const RecentTransaction = () => {
     getData();
   }, [getData]);
 
-  const filterSearch = data.filter((item) =>
-    item.admission.admissionNo.toLowerCase().includes(searchData.toLowerCase())
-  );
-  const filtersearchDateOfAdmission = data.filter(
-    (d) => d.admission.DateOfAdmission === searchDateOfAdmission
-  );
+  // const filterSearch = data.filter((item) =>
+  //   item.admission.admissionNo.toLowerCase().includes(searchData.toLowerCase())
+  // );
+  // const filtersearchDateOfAdmission = data.filter(
+  //   (d) => d.admission.DateOfAdmission === searchDateOfAdmission
+  // );
 
-  const filterGrade = data.filter(
-    (f) => f.admission.grade.toLowerCase() === selectGrade.toLowerCase()
-  );
+  // const filterGrade = data.filter(
+  //   (f) => f.admission.grade.toLowerCase() === selectGrade.toLowerCase()
+  // );
+  const handleSearchFilter = async () => {
+    let tempData: INewAdmission[] = new Array<INewAdmission>();
+
+    console.log(data);
+    try {
+      if (selectFee) {
+        data.forEach((f) =>
+          f.feeDetails.forEach((t) => {
+            console.log(t.name.toLowerCase(), selectFee.toLowerCase());
+            if (t.name.toLowerCase() === selectFee.toLowerCase()) {
+              tempData.push(f);
+            }
+          })
+        );
+      }
+
+      if (selectGrade) {
+        tempData.filter(
+          (f) => f.admission.grade.toLowerCase() === selectGrade.toLowerCase()
+        );
+      }
+
+      // If no filter criteria is met, reset the filtered data to the original data
+      setFilterData(tempData);
+      console.log(tempData);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return (
     <div className="recent-transaction-container">
       <div className="mx">
@@ -87,6 +137,11 @@ const RecentTransaction = () => {
               selectGrade={selectGrade}
               setOpenGrade={setOpenGrade}
               setSelectGrade={setSelectGrade}
+              openFee={openFee}
+              setOpenFee={setOpenFee}
+              setSelectFee={setSelectFee}
+              selectFee={selectFee}
+              handleSearchFilter={handleSearchFilter}
             />
           </div>
 
@@ -103,14 +158,18 @@ const RecentTransaction = () => {
                   <th>DETAILS</th>
                 </tr>
               </thead>
-              <tbody>
+              {/* <tbody>
                 {filterSearch.length === 0 &&
                 filtersearchDateOfAdmission.length === 0 &&
                 filterGrade.length === 0
                   ? currentData.map((f, i) => (
                       <tr key={i}>
                         <td>{f.admission.admissionNo}</td>
-                        <td>JUNE16,2024</td>
+                        <td>
+                          {moment(f.feeDetails.admisionFee.updatedDate).format(
+                            "dd-mm-yy"
+                          )}
+                        </td>
                         <td>{f.student.nameInEnglish}</td>
                         <td>{f.admission.admissionNo}</td>
                         <td>Admission fee</td>
@@ -131,7 +190,12 @@ const RecentTransaction = () => {
                   ? filtersearchDateOfAdmission.map((f, i) => (
                       <tr key={i}>
                         <td>{f.admission.admissionNo}</td>
-                        <td>JUNE16,2024</td>
+                        <td>
+                          {" "}
+                          {moment(f.feeDetails.admisionFee.updatedDate).format(
+                            "dd-mm-yy"
+                          )}
+                        </td>
                         <td>{f.student.nameInEnglish}</td>
                         <td>{f.admission.admissionNo}</td>
                         <td>Admission fee</td>
@@ -152,7 +216,11 @@ const RecentTransaction = () => {
                   ? filterSearch.map((f, i) => (
                       <tr key={i}>
                         <td>{f.admission.admissionNo}</td>
-                        <td>JUNE16,2024</td>
+                        <td>
+                          {moment(f.feeDetails.admisionFee.updatedDate).format(
+                            "dd-mm-yy"
+                          )}
+                        </td>
                         <td>{f.student.nameInEnglish}</td>
                         <td>{f.admission.admissionNo}</td>
                         <td>Admission fee</td>
@@ -172,11 +240,16 @@ const RecentTransaction = () => {
                   : filterGrade.map((f, i) => (
                       <tr key={i}>
                         <td>{f.admission.admissionNo}</td>
-                        <td>JUNE16,2024</td>
+                        <td>
+                          {" "}
+                          {moment(f.feeDetails.admisionFee.updatedDate).format(
+                            "dd-mm-yy"
+                          )}
+                        </td>
                         <td>{f.student.nameInEnglish}</td>
                         <td>{f.admission.admissionNo}</td>
                         <td>Admission fee</td>
-                        <td>5000 INR</td>
+                        <td>{f.feeDetails.admisionFee.amount}</td>
                         <td
                           style={{
                             textDecoration: "underline",
@@ -189,6 +262,70 @@ const RecentTransaction = () => {
                         </td>
                       </tr>
                     ))}
+              </tbody> */}
+
+              <tbody>
+                {filterData.length > 0
+                  ? filterData.map((f, i) =>
+                      f.feeDetails
+                        .filter((d) => d.state === true)
+                        .map((s) => (
+                          <tr key={i}>
+                            <td>{s.reciptNo}</td>
+                            <td>
+                              {moment(s.updatedDate).format("MMM DD, YYYY")}
+                            </td>
+                            <td>{f.student.nameInEnglish}</td>
+                            <td>{f.admission.admissionNo}</td>
+                            <td>{s.name}</td>
+                            <td>{s.amount} INR</td>
+                            <td
+                              style={{
+                                textDecoration: "underline",
+                                cursor: "pointer",
+                                color: "#455A64",
+                              }}
+                              onClick={() =>
+                                navigate(`/paymenthistory/${f.id}`)
+                              }
+                            >
+                              View
+                            </td>
+                          </tr>
+                        ))
+                    )
+                  : data.map((f, i) =>
+                      f.feeDetails
+                        .filter(
+                          (d) =>
+                            d.state === true &&
+                            d.name.toLowerCase() === selectFee.toLowerCase()
+                        )
+                        .map((s) => (
+                          <tr key={i}>
+                            <td>{s.reciptNo}</td>
+                            <td>
+                              {moment(s.updatedDate).format("MMM DD, YYYY")}
+                            </td>
+                            <td>{f.student.nameInEnglish}</td>
+                            <td>{f.admission.admissionNo}</td>
+                            <td>{s.name}</td>
+                            <td>{s.amount} INR</td>
+                            <td
+                              style={{
+                                textDecoration: "underline",
+                                cursor: "pointer",
+                                color: "#455A64",
+                              }}
+                              onClick={() =>
+                                navigate(`/paymenthistory/${f.id}`)
+                              }
+                            >
+                              View
+                            </td>
+                          </tr>
+                        ))
+                    )}
               </tbody>
             </table>
           </div>
@@ -196,7 +333,7 @@ const RecentTransaction = () => {
             <div className="pagination">
               <p
                 style={{
-                  color: "#777",
+                  color: "#455a64",
                   fontFamily: "Gilroy",
                   fontSize: "14px",
                 }}

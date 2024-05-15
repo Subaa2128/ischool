@@ -10,27 +10,34 @@ import { collection, getDocs, query } from "firebase/firestore";
 import { db } from "../../utils/firebase";
 import moment from "moment";
 import numberToWords from "number-to-words";
+import { PDFDownloadLink } from "@react-pdf/renderer";
+import Pdf from "../../Pages/Pdf";
 
 interface IRecipt {
   id?: string;
 }
 const Recipt: React.FC<IRecipt> = ({ id }) => {
   const divToPrintRef = useRef(null);
-
+  const [totalFee, setTotalFee] = useState<number>();
   const [data, setData] = useState<INewAdmission>();
-  const number =
-    Number(
-      data?.feeDetails.admisionFee.state
-        ? data?.feeDetails.admisionFee.amount
-        : 0
-    ) +
-    Number(
-      data?.feeDetails.schoolFee.state ? data?.feeDetails.schoolFee.amount : 0
-    ) +
-    Number(
-      data?.feeDetails.customFee.state ? data?.feeDetails.customFee.amount : 0
-    );
-  const words = numberToWords.toWords(number);
+  const [words, setWords] = useState<string>();
+
+  const calculateFee = (data: any) => {
+    // if (data?.feeDetails?.length) {
+    //   setTotalFee(0);
+    //   return;
+    // }
+
+    console.log(data);
+    let tempFee = 0;
+    console.log(data?.feeDetails);
+    const number = data?.feeDetails.forEach((f: { amount: any }) => {
+      console.log("sjkjs", f);
+      tempFee += Number(f.amount);
+    });
+    console.log(tempFee);
+    return tempFee;
+  };
 
   const getData = useCallback(async () => {
     const q = query(collection(db, "NewAdmission"));
@@ -41,6 +48,10 @@ const Recipt: React.FC<IRecipt> = ({ id }) => {
     }));
     const filteredData = fetchedData.find((f) => f.id === id);
     setData(filteredData);
+
+    const tFee = calculateFee(filteredData);
+    setTotalFee(tFee);
+    setWords(numberToWords.toWords(Number(tFee)));
   }, [id]);
 
   useEffect(() => {
@@ -83,7 +94,7 @@ const Recipt: React.FC<IRecipt> = ({ id }) => {
             <div className="recipt-details">
               <div className="recipt-detail">
                 <p>Receipt No</p>
-                <h3>{data?.feeDetails.reciptNo}</h3>
+                <h3>{data?.feeDetails[0].reciptNo}</h3>
               </div>
               <div className="recipt-detail">
                 <p>Admission No</p>
@@ -109,20 +120,24 @@ const Recipt: React.FC<IRecipt> = ({ id }) => {
             </div>
             <div className="border"></div>
             <div className="admision-details">
-              {data?.feeDetails.schoolFee.state && (
-                <div className="detail">
-                  <p>Admission fee</p>
-                  <h3>{data?.feeDetails.admisionFee.amount}.00</h3>
-                </div>
+              {data?.feeDetails.map(
+                (f) =>
+                  f.state &&
+                  f.updatedDate >= Date.now() - 10 && (
+                    <div className="detail">
+                      <p>{f.name}</p>
+                      <h3>{f.amount}.00</h3>
+                    </div>
+                  )
               )}
 
-              {data?.feeDetails.schoolFee.state && (
+              <div className="border"></div>
+              <div className="admission-setails">
                 <div className="detail">
-                  <p>School fee</p>
-                  <h3>{data?.feeDetails.schoolFee.amount}.00</h3>
+                  <p>Total</p>
+                  <h3>{totalFee}.00</h3>
                 </div>
-              )}
-
+              </div>
               <div className="border"></div>
             </div>
 
@@ -134,6 +149,43 @@ const Recipt: React.FC<IRecipt> = ({ id }) => {
             </div>
           </div>
           <div className="button">
+            {/* {data && (
+              <PDFDownloadLink
+                document={
+                  <Pdf
+                    admissionNo={data?.admission.admissionNo as string}
+                    nameInEnglish={data?.student.nameInEnglish as string}
+                    grade={data?.admission.grade as string}
+                    academicYear={data?.admission.academicYear as string}
+                    feeDetails={data?.feeDetails as any}
+                    totalFee={totalFee?.toString() as string}
+                    words={words as string}
+                  />
+                }
+                fileName="recipt"
+              >
+                {({ blob, url, loading, error }) =>
+                  loading ? (
+                    <Button
+                      variant="primary"
+                      // onClick={() => downloadDocument()}
+                      leftIcon={<Download />}
+                    >
+                      ....Download Recipt
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="primary"
+                      // onClick={() => downloadDocument()}
+                      leftIcon={<Download />}
+                    >
+                      Download Recipt
+                    </Button>
+                  )
+                }
+              </PDFDownloadLink>
+            )} */}
+
             <Button
               variant="primary"
               onClick={() => downloadDocument()}
@@ -141,6 +193,7 @@ const Recipt: React.FC<IRecipt> = ({ id }) => {
             >
               Download Recipt
             </Button>
+
             <Button
               variant="primary"
               leftIcon={<Print />}

@@ -1,37 +1,37 @@
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import "./PaymentHistory.scss";
 import { ReactComponent as LeftArrow } from "../../assets/Icons/arrow-left-circle.svg";
 import { ReactComponent as CloseIcon } from "../../assets/Icons/x.svg";
 import StudentProfile from "../../Components/Profile";
 import PaymentDetails from "../../Components/PaymentDetails";
-// import { collection, getDocs, query } from "firebase/firestore";
+import { collection, getDocs, query } from "firebase/firestore";
 import { useNavigate, useParams } from "react-router-dom";
-// import { db } from "../../utils/firebase";
-// import { INewAdmission } from "../../utils/types";
+import { db } from "../../utils/firebase";
+import { INewAdmission } from "../../utils/types";
 import Recipt from "../../Components/Recipt";
 import moment from "moment";
 
 const PaymentHistory = () => {
   const navigate = useNavigate();
   const [openHistory, setOpenHistory] = useState(true);
-  // const [data, setData] = useState<INewAdmission>();
+  const [data, setData] = useState<INewAdmission>();
   const [openRecipt, setOpenRecipt] = useState(false);
   const { id } = useParams();
 
-  // const getData = useCallback(async () => {
-  //   const q = query(collection(db, "NewAdmission"));
-  //   const querySnapshot = await getDocs(q);
-  //   const fetchedData = querySnapshot.docs.map((doc) => ({
-  //     id: doc.id,
-  //     ...(doc.data() as Omit<INewAdmission, "id">),
-  //   }));
-  //   const filteredData = fetchedData.find((f) => f.id === id);
-  //   setData(filteredData);
-  // }, []);
+  const getData = useCallback(async () => {
+    const q = query(collection(db, "NewAdmission"));
+    const querySnapshot = await getDocs(q);
+    const fetchedData = querySnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...(doc.data() as Omit<INewAdmission, "id">),
+    }));
+    const filteredData = fetchedData.find((f) => f.id === id);
+    setData(filteredData);
+  }, []);
 
-  // useEffect(() => {
-  //   getData();
-  // }, [getData]);
+  useEffect(() => {
+    getData();
+  }, [getData]);
 
   return (
     <div className="payment-history-container">
@@ -71,20 +71,29 @@ const PaymentHistory = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      <tr>
-                        <td>2333</td>
-                        <td>{moment().format("MMM Do YY")}</td>
-                        <td>2892</td>
+                      {data?.feeDetails.map(
+                        (f, i) =>
+                          f.state && (
+                            <tr key={i}>
+                              <td style={{ textTransform: "capitalize" }}>
+                                {f.name}
+                              </td>
+                              <td>
+                                {moment(f.updatedDate).format("MMM DD,S YYYY")}
+                              </td>
+                              <td>{f.amount}</td>
 
-                        <td
-                          style={{
-                            textDecoration: "underline",
-                            cursor: "pointer",
-                          }}
-                        >
-                          DOWNLOAD
-                        </td>
-                      </tr>
+                              <td
+                                style={{
+                                  textDecoration: "underline",
+                                  cursor: "pointer",
+                                }}
+                              >
+                                DOWNLOAD
+                              </td>
+                            </tr>
+                          )
+                      )}
                     </tbody>
                   </table>
                 </div>

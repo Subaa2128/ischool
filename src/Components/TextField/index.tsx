@@ -28,7 +28,7 @@ const TextField: React.FC<ITextFieldProps> = ({
       </label> */}
       <div
         className="field"
-        style={{ border: !isError ? "1px solid #ddd" : "1px solid #c22828" }}
+        style={{ border: !isError ? "1px solid #c7dce6" : "1px solid #c22828" }}
       >
         {leftIcon && <span className="text-left-icon">{leftIcon}</span>}
         <Field

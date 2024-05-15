@@ -13,10 +13,23 @@ interface ISearch {
   setSearchDateOfSubmision: React.Dispatch<React.SetStateAction<string>>;
   setSelectGrade: React.Dispatch<React.SetStateAction<string>>;
   setOpenGrade: React.Dispatch<React.SetStateAction<boolean>>;
+  setSelectFee: React.Dispatch<React.SetStateAction<string>>;
+  setOpenFee: React.Dispatch<React.SetStateAction<boolean>>;
+  handleSearchFilter: () => Promise<void>;
+  openFee: boolean;
   searchData: string;
   openGrade: boolean;
   selectGrade: string;
+  selectFee: string;
 }
+const FeeDetails = [
+  { value: "admissionFee", label: "Admission fee" },
+  { value: "schoolFee", label: "School fee" },
+  { value: "customFee", label: "Custom fee" },
+  { value: "term1", label: "Term-1" },
+  { value: "term2", label: "Term-2" },
+  { value: "term3", label: "Term-3" },
+];
 
 const Search: React.FC<ISearch> = ({
   setSearchData,
@@ -26,6 +39,11 @@ const Search: React.FC<ISearch> = ({
   selectGrade,
   setOpenGrade,
   setSelectGrade,
+  openFee,
+  setSelectFee,
+  setOpenFee,
+  selectFee,
+  handleSearchFilter,
 }) => {
   const [openFilter, setOpenFilter] = useState(false);
 
@@ -69,15 +87,38 @@ const Search: React.FC<ISearch> = ({
               </div>
             )}
           </div>
+          <div className="drop-down">
+            <div className="value" onClick={() => setOpenFee((m) => !m)}>
+              <p>{selectFee ? selectFee : "select fee"}</p> <Dropdown />
+            </div>
+            {openFee && (
+              <div className="option">
+                {FeeDetails.map((f, i) => (
+                  <p
+                    onClick={() => [setSelectFee(f.value), setOpenFee(false)]}
+                    key={i}
+                  >
+                    {f.label}
+                  </p>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       )}
-      <FilterIcon
-        width={openFilter ? 100 : 40}
-        height={openFilter ? 60 : 40}
-        onClick={() => setOpenFilter((m) => !m)}
-        style={{ cursor: "pointer" }}
-      />
-      {openFilter && <Button variant="primary">Apply</Button>}
+      {!openFilter && (
+        <FilterIcon
+          width={openFilter ? 100 : 40}
+          height={openFilter ? 60 : 40}
+          onClick={() => setOpenFilter((m) => !m)}
+          style={{ cursor: "pointer" }}
+        />
+      )}
+      {openFilter && (
+        <Button variant="primary" onClick={() => [handleSearchFilter()]}>
+          Apply
+        </Button>
+      )}
     </div>
   );
 };

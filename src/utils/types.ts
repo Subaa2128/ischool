@@ -73,24 +73,14 @@ export type INewAdmission = {
     birthCertificate: string;
     tenthMarksheet: string;
   };
-  feeDetails: {
-    reciptNo?: string;
-    admisionFee: {
-      updatedDate: Date;
-      amount: string;
-      state: boolean;
-    };
-    schoolFee: {
-      updatedDate: Date;
-      amount: string;
-      state: boolean;
-    };
-    customFee: {
+  feeDetails: [
+    {
+      reciptNo: string;
       name: string;
+      updatedDate: number;
       amount: string;
       state: boolean;
-      date: Date;
-    };
-  };
+    }
+  ];
   id?: string;
 };
