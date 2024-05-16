@@ -105,8 +105,8 @@ const Payment = () => {
                     </div>
                     {openSelectClass && (
                       <div className="options">
-                        {gradeOptions.map((f) => (
-                          <p onClick={() => setSelectedClass(f.value)}>
+                        {gradeOptions.map((f, i) => (
+                          <p key={i} onClick={() => setSelectedClass(f.value)}>
                             {f.label}
                           </p>
                         ))}

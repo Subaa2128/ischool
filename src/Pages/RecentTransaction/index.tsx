@@ -11,6 +11,8 @@ import { useNavigate } from "react-router-dom";
 import moment from "moment";
 import { toHaveAttribute } from "@testing-library/jest-dom/matchers";
 import { array } from "yup";
+import { replace } from "formik";
+import { serialize } from "v8";
 
 const EntriesPerPage = 10;
 
@@ -58,73 +60,182 @@ const RecentTransaction = () => {
     return pages;
   };
 
+  function determineInputType(input: string): string {
+    // Check if input is empty or just whitespace
+    if (input.trim().length === 0) {
+      return "";
+    }
+
+    // Check if input is a number
+    if (!isNaN(input as any) && !isNaN(parseFloat(input))) {
+      return "number";
+    }
+
+    // Otherwise, it's a string
+    return "string";
+  }
+
   useEffect(() => {
-    if (searchDateOfAdmission && searchDateToAdmission) {
+    console.log("Filter");
+    if (
+      searchDateOfAdmission === "" &&
+      searchDateToAdmission === "" &&
+      selectFee === "" &&
+      selectGrade === "" &&
+      searchData === ""
+    ) {
       setFilterData([]);
       return;
     }
-    console.log(
-      moment(
+
+    let tempData: INewAdmission[] = data;
+
+    if (searchData !== "") {
+      const type = determineInputType(searchData);
+
+      if (type === "number") {
+        tempData = tempData
+          .map((item) => {
+            const filteredFeeDetails = item.feeDetails.filter(
+              (feeDetail: FeeDetail) => {
+                return feeDetail.reciptNo.includes(searchData);
+              }
+            );
+            const matchesAdmissionNumber = item.admission.admissionNo
+              .toLowerCase()
+              .includes(searchData.toLowerCase());
+            const matchesName = item.student.nameInEnglish
+              .toLowerCase()
+              .includes(searchData.toLowerCase());
+
+            return {
+              ...item,
+              feeDetails: filteredFeeDetails,
+              matches:
+                matchesAdmissionNumber ||
+                matchesName ||
+                filteredFeeDetails.length > 0,
+            };
+          })
+          .filter((item: any) => item.matches)
+          .map((item: any) => {
+            const { matches, ...rest } = item; // remove the temporary 'matches' property
+            return rest;
+          });
+      }
+      tempData = tempData
+        .map((item) => {
+          const filteredFeeDetails = item.feeDetails.filter(
+            (feeDetail: FeeDetail) => {
+              return feeDetail.reciptNo.includes(searchData);
+            }
+          );
+          const matchesAdmissionNumber = item.admission.admissionNo
+            .toLowerCase()
+            .includes(searchData.toLowerCase());
+          const matchesName = item.student.nameInEnglish
+            .toLowerCase()
+            .includes(searchData.toLowerCase());
+
+          return {
+            ...item,
+            feeDetails: filteredFeeDetails,
+            matches:
+              matchesAdmissionNumber ||
+              matchesName ||
+              filteredFeeDetails.length > 0,
+          };
+        })
+        .filter((item: any) => item.matches)
+        .map((item: any) => {
+          const { matches, ...rest } = item; // remove the temporary 'matches' property
+          return rest;
+        });
+    }
+    if (searchDateOfAdmission !== "") {
+      // Parse the searchDateOfAdmission once to avoid repeated parsing in the loop
+      const searchDateTimestamp = moment(
         `${searchDateOfAdmission} 00:00:00`,
         "YYYY-MM-DD HH:mm:ss"
-      ).valueOf()
-    );
-    console.log(
-      moment(
-        `${searchDateToAdmission} 00:00:00`,
-        "YYYY-MM-DD HH:mm:ss"
-      ).valueOf()
-    );
+      ).valueOf();
 
-    let tempData = data;
-    if (searchDateOfAdmission !== "") {
-      tempData.map((item, i) => {
-        let temp = item.feeDetails.filter((item) => {
-          console.log(
-            item.updatedDate,
-            moment(
-              `${searchDateOfAdmission} 00:00:00`,
-              "YYYY-MM-DD HH:mm:ss"
-            ).valueOf()
-          );
-          return (
-            item.updatedDate >
-            moment(
-              `${searchDateOfAdmission} 00:00:00`,
-              "YYYY-MM-DD HH:mm:ss"
-            ).valueOf()
-          );
+      // Iterate over each item in tempData
+      tempData = tempData.map((item: any) => {
+        // Filter feeDetails based on the condition
+        const filteredFeeDetails = item.feeDetails.filter((feeDetail: any) => {
+          return feeDetail.updatedDate > searchDateTimestamp;
         });
-        console.log(temp);
-        //tempData[i].feeDetails = temp;
+
+        // Replace the feeDetails array with the filtered array
+        return {
+          ...item,
+          feeDetails: filteredFeeDetails,
+        };
       });
-      console.log(tempData);
+
+      // Log the updated tempData for debugging purposes
+      // tempData.forEach((element: any) => {
+      //   console.log(element.feeDetails);
+      // });
     }
     if (searchDateToAdmission !== "") {
-      tempData.map((item, i) => {
-        let temp = item.feeDetails.filter((item) => {
-          console.log(
-            item.updatedDate,
-            moment(
-              `${searchDateToAdmission} 23:59:59`,
-              "YYYY-MM-DD HH:mm:ss"
-            ).valueOf()
-          );
-          return (
-            item.updatedDate <
-            moment(
-              `${searchDateToAdmission} 23:59:59`,
-              "YYYY-MM-DD HH:mm:ss"
-            ).valueOf()
-          );
+      // Parse the searchDateOfAdmission once to avoid repeated parsing in the loop
+      const searchDateTimestamp = moment(
+        `${searchDateToAdmission} 23:59:59`,
+        "YYYY-MM-DD HH:mm:ss"
+      ).valueOf();
+
+      // Iterate over each item in tempData
+      tempData = tempData.map((item: any) => {
+        // Filter feeDetails based on the condition
+        const filteredFeeDetails = item.feeDetails.filter((feeDetail: any) => {
+          return feeDetail.updatedDate < searchDateTimestamp;
         });
-        console.log(temp);
-        //tempData[i].feeDetails = temp;
+
+        // Replace the feeDetails array with the filtered array
+        return {
+          ...item,
+          feeDetails: filteredFeeDetails,
+        };
       });
-      console.log(tempData);
     }
+
+    if (selectFee !== "") {
+      console.log("Fee Filtering...");
+      // Iterate over each item in tempData
+      tempData = tempData.map((item: any) => {
+        // Filter feeDetails based on the condition
+
+        const filteredFeeDetails = item.feeDetails.filter(
+          (feeDetail: FeeDetail) => {
+            return feeDetail.name.toLowerCase() === selectFee.toLowerCase();
+          }
+        );
+
+        // Replace the feeDetails array with the filtered array
+        return {
+          ...item,
+          feeDetails: filteredFeeDetails,
+        };
+      });
+    }
+    if (selectGrade !== "") {
+      tempData = tempData.filter(
+        (item: any) =>
+          item.admission.grade.toLowerCase() === selectGrade.toLowerCase()
+      );
+    }
+    console.log(tempData);
+
     setFilterData(tempData);
-  }, [searchDateOfAdmission, searchDateToAdmission, selectGrade, selectFee]);
+    // Log the updated tempData for debugging purposes
+  }, [
+    searchDateOfAdmission,
+    searchDateToAdmission,
+    selectGrade,
+    selectFee,
+    searchData,
+  ]);
 
   // const startIndex = (currentPage - 1) * EntriesPerPage;
   // const endIndex = startIndex + EntriesPerPage;
@@ -133,6 +244,7 @@ const RecentTransaction = () => {
   //     ? filterData.slice(startIndex, endIndex)
   //     : data.slice(startIndex, endIndex);
 
+  console.log(filterData);
   const getData = useCallback(async () => {
     const q = query(collection(db, "NewAdmission"));
     const querySnapshot = await getDocs(q);
@@ -140,110 +252,26 @@ const RecentTransaction = () => {
       id: doc.id,
       ...(doc.data() as Omit<INewAdmission, "id">),
     }));
-    // const filterredData = fetchedData.filter(
-    //   (s) => s.feeDetails.admisionFee.state === true
-    // );
-    // const sortData = filterredData.sort((a, b) => {
-    //   const timeA: any = new Date(a.feeDetails.admisionFee.updatedDate);
-    //   const timeB: any = new Date(b.feeDetails.admisionFee.updatedDate);
-    //   return timeB - timeA;
-    // });
-    console.log(fetchedData);
-    setData(fetchedData);
+
+    const sortData = fetchedData.sort((a, b) => {
+      const timeA: any = new Date(a.feeDetails[0].updatedDate);
+      const timeB: any = new Date(b.feeDetails[0].updatedDate);
+      return timeB - timeA;
+    });
+
+    setData(sortData);
   }, []);
   useEffect(() => {
     getData();
   }, [getData]);
 
-  // const filterSearch = data.filter((item) =>
-  //   item.admission.admissionNo.toLowerCase().includes(searchData.toLowerCase())
-  // );
-  // const filtersearchDateOfAdmission = data.filter(
-  //   (d) => d.admission.DateOfAdmission === searchDateOfAdmission
-  // );
-
-  // const filterGrade = data.filter(
-  //   (f) => f.admission.grade.toLowerCase() === selectGrade.toLowerCase()
-  // );
   const handleSearchFilter = async () => {
-    // console.log("Handle Search");
-    // let tempData: INewAdmission[] = new Array<INewAdmission>();
-
-    // console.log(data);
-    // try {
-    //   if (selectFee) {
-    //     data.forEach((t) => {
-    //       t.feeDetails.forEach((fee) => {
-    //         if (fee.name.toLowerCase() === selectFee.toLowerCase()) {
-    //           tempData.push(t);
-    //         }
-    //       });
-    //     });
-    //   }
-
-    //   if (selectGrade !== "") {
-    //     console.log("Applying Grade filter", selectGrade);
-    //     data.forEach((item) => {
-    //       if (
-    //         item.admission.grade.toLowerCase() === selectGrade.toLowerCase()
-    //       ) {
-    //         if (!tempData.includes(item)) {
-    //           tempData.push(item);
-    //         }
-    //       }
-    //     });
-    //     console.log("Grade filter", tempData);
-    //   }
-
-    //   if (searchDateOfAdmission !== "") {
-    //     console.log("Applying from date filter", searchDateOfAdmission);
-
-    //     const timeStamp = moment(
-    //       `${searchDateOfAdmission} 00:00:00`,
-    //       "YYYY-MM-DD HH:mm:ss"
-    //     ).valueOf();
-
-    //     data.forEach((item) =>
-    //       item.feeDetails.forEach((item1) => {
-    //         if (item1?.updatedDate > timeStamp) {
-    //           if (!tempData.includes(item)) {
-    //             tempData.push(item);
-    //           }
-    //         }
-    //       })
-    //     );
-    //   }
-
-    //   if (searchDateToAdmission !== "") {
-    //     console.log("Applying from date filter", searchDateToAdmission);
-
-    //     const timeStamp = moment(
-    //       `${searchDateToAdmission} 00:00:00`,
-    //       "YYYY-MM-DD HH:mm:ss"
-    //     ).valueOf();
-
-    //     data.forEach((item) =>
-    //       item.feeDetails.forEach((item1) => {
-    //         console.log(item1?.updatedDate, timeStamp);
-    //         if (item1?.updatedDate < timeStamp) {
-    //           if (!tempData.includes(item)) {
-    //             tempData.push(item);
-    //           }
-    //         }
-    //       })
-    //     );
-    //   }
-    //   // If no filter criteria is met, reset the filtered data to the original data
-    //   setFilterData(tempData);
-    //   console.log(tempData);
-    // } catch (error) {
-    //   console.error(error);
-    // }
     setFilterData([]);
     setSelectGrade("");
     setSearchDateOfSubmision("");
     setSearchDateToSubmision("");
     setSelectFee("");
+    setSearchData("");
   };
 
   return (
@@ -395,18 +423,12 @@ const RecentTransaction = () => {
                     ))}
               </tbody> */}
               <tbody>
-                {filterData.length > 0
+                {filterData.length !== 0
                   ? filterData.map((f, i) =>
                       f.feeDetails
-                        .filter(
-                          (d) =>
-                            d.state === true &&
-                            d.name.toLowerCase() === selectFee.toLowerCase() &&
-                            f.admission.grade.toLowerCase() ===
-                              selectGrade.toLowerCase()
-                        )
-                        .map((s) => (
-                          <tr key={i}>
+                        .filter((d) => d.state === true)
+                        .map((s, index) => (
+                          <tr key={i && index + 1}>
                             <td>{s.reciptNo}</td>
                             <td>
                               {moment(s.updatedDate).format("MMM DD, YYYY")}
@@ -433,8 +455,8 @@ const RecentTransaction = () => {
                   : data.map((f, i) =>
                       f.feeDetails
                         .filter((d) => d.state === true)
-                        .map((s) => (
-                          <tr key={i}>
+                        .map((s, index) => (
+                          <tr key={i && index + 1}>
                             <td>{s.reciptNo}</td>
                             <td>
                               {moment(s.updatedDate).format("MMM DD, YYYY")}

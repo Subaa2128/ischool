@@ -96,9 +96,9 @@ const Pdf: React.FC<IPdf> = ({
               <View style={styles.border}></View>
               <View>
                 {feeDetails.map(
-                  (f) =>
+                  (f, i) =>
                     f.state && (
-                      <View style={styles.detail}>
+                      <View key={i} style={styles.detail}>
                         <Text style={styles.text}>{f.name}</Text>
                         <Text style={styles.heading}>{f.amount}.00</Text>
                       </View>
