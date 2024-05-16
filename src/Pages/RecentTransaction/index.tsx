@@ -211,6 +211,7 @@ const RecentTransaction = () => {
   //     ? filterData.slice(startIndex, endIndex)
   //     : data.slice(startIndex, endIndex);
 
+  console.log(filterData);
   const getData = useCallback(async () => {
     const q = query(collection(db, "NewAdmission"));
     const querySnapshot = await getDocs(q);

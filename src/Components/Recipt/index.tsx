@@ -83,7 +83,7 @@ const Recipt: React.FC<IRecipt> = ({
             <div className="recipt-details">
               <div className="recipt-detail">
                 <p>Receipt No</p>
-                <h3>{data?.feeDetails[0].reciptNo}</h3>
+                <h3>{receiptNumber}</h3>
               </div>
               <div className="recipt-detail">
                 <p>Admission No</p>
@@ -111,9 +111,8 @@ const Recipt: React.FC<IRecipt> = ({
             <div className="admision-details">
               {data?.feeDetails.map(
                 (f, i) =>
-                  f.state &&
                   selectedFees.includes(i) && (
-                    <div className="detail">
+                    <div className="detail" key={i}>
                       <p>{f.name}</p>
                       <h3>{Number(f.amount).toLocaleString()}.00</h3>
                     </div>
