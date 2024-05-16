@@ -1,0 +1,120 @@
+@font-face {
+  font-family: "Montserrat-black";
+  src: local("MontserratBlack"),
+    url("./assets/Fonts/Montserrat-Black.ttf") format("truetype");
+}
+@font-face {
+  font-family: "Montserrat-bold";
+  src: local("MontserratBold"),
+    url("./assets/Fonts/Montserrat-Bold.ttf") format("truetype");
+}
+@font-face {
+  font-family: "Montserrat-extrabold";
+  src: local("MontserratExtraBold"),
+    url("./assets/Fonts/Montserrat-ExtraBold.ttf") format("truetype");
+}
+@font-face {
+  font-family: "Montserrat-medium";
+  src: local("MontserratMedium"),
+    url("./assets/Fonts/Montserrat-Medium.ttf") format("truetype");
+}
+@font-face {
+  font-family: "Montserrat-regular";
+  src: local("MontserratRegular"),
+    url("./assets/Fonts/Montserrat-Regular.ttf") format("truetype");
+}
+@font-face {
+  font-family: "Montserrat-light";
+  src: local("MontserratLight"),
+    url("./assets/Fonts/Montserrat-Light.ttf") format("truetype");
+}
+
+:root {
+  /* FONTS */
+  --font-regular: "Montserrat-regular";
+  --font-bold: "Montserrat-bold";
+  --font-light: "Montserrat-light";
+  --font-medium: "Montserrat-medium";
+  --font-black: "Montserrat-black";
+
+  /* COLOR-PALETTE */
+  --background: #fff;
+  --background-login: #d9d9d9;
+  --button-primary: #455a64;
+  --button-secondary: #c22828;
+
+  --border-primary: #c7dce6;
+  --border-secondary: #455a64;
+  --border-tertiary: #aaa;
+
+  --text-primary: #455a64;
+  --text-secondary: #455a64;
+  --text-tertiary: #fff;
+  --text-highlight: #555;
+  --text-error: #c22828;
+}
+html {
+  font-size: 62.5%;
+
+  @media (max-width: 576px) {
+    font-size: 55%;
+  }
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-size: 1.4rem;
+  font-family: var(--font-regular);
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--background);
+  line-height: 1.5;
+  font-family: var(--font-light);
+  height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  color: var(--text-primary);
+}
+
+.mx {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+input {
+  border: none;
+  outline: none;
+}
+
+h3 {
+  color: #252525;
+  font-family: var(--font-medium);
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
+}
+p {
+  color: var(--text-primary);
+
+  text-align: center;
+  // font-family: Gilroy;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 125.8%;
+}
+
+span {
+  color: #252525;
+  // font-family: Gilroy;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
+}

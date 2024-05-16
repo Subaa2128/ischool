@@ -1,0 +1,104 @@
+.new-admission-container {
+  padding: 64px;
+  .new-admission-wrapper {
+    margin-top: 100px;
+    .navgation {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 40px;
+    }
+    .staff-ward {
+      display: grid;
+      gap: 24px;
+      grid-template-columns: 1fr 1fr;
+      justify-content: space-between;
+      align-items: center;
+      border: 1px solid var(--border-primary);
+      padding: 16px 32px;
+      margin-bottom: 24px;
+      .checkbox {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        .form_input {
+          .field {
+            border: none;
+          }
+        }
+      }
+    }
+    .new-admission-form {
+      border: 1px solid var(--border-primary);
+      padding: 32px 32px 8px;
+      .header-tab {
+        display: flex;
+        justify-content: space-between;
+        align-items: stretch;
+        p {
+          padding: 16px 24px;
+          font-weight: 600;
+          display: flex;
+          justify-content: center;
+          width: 100%;
+          border: 1px solid var(--border-primary);
+          border-left: none;
+
+          &:nth-child(1) {
+            border-left: 1px solid var(--border-primary);
+          }
+        }
+      }
+      .border {
+        border-top: 1px solid var(--border-primary);
+        margin: 32px 0;
+      }
+      .form {
+        .form-fields {
+          .grid {
+            gap: 24px;
+            padding-bottom: 24px;
+            h3 {
+              padding-bottom: 24px;
+            }
+            .grid-one,
+            .grid-two {
+              display: grid;
+              grid-template-columns: 1fr 1fr;
+              gap: 24px;
+              padding-bottom: 24px;
+              position: relative;
+              .options {
+                border-radius: 2px;
+                border: 1px solid var(--border-primary);
+                background: #fff;
+                margin-top: 4px;
+                z-index: 2;
+                position: absolute;
+                width: 49%;
+                p {
+                  padding: 16px 24px;
+                  text-align: left;
+                  border-bottom: 1px solid #c7dce6;
+                  cursor: pointer;
+                }
+              }
+              .upload-file {
+                p {
+                  text-align: left;
+                  padding-top: 4px;
+                  font-size: 14px;
+                }
+              }
+            }
+            // .grid-two {
+            //   display: grid;
+            //   grid-template-columns: 1fr 1fr;
+            //   gap: 24px;
+            // }
+          }
+        }
+      }
+    }
+  }
+}

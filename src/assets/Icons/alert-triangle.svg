@@ -1,0 +1,7 @@
+<svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="alert-triangle">
+<path id="Vector" d="M51.4501 19.3L9.1001 90C8.22694 91.5121 7.76494 93.2265 7.76005 94.9726C7.75516 96.7187 8.20756 98.4356 9.07224 99.9526C9.93692 101.47 11.1837 102.734 12.6886 103.619C14.1936 104.505 15.9041 104.981 17.6501 105H102.35C104.096 104.981 105.807 104.505 107.312 103.619C108.816 102.734 110.063 101.47 110.928 99.9526C111.793 98.4356 112.245 96.7187 112.24 94.9726C112.235 93.2265 111.773 91.5121 110.9 90L68.5501 19.3C67.6588 17.8305 66.4037 16.6156 64.9061 15.7724C63.4085 14.9292 61.7188 14.4863 60.0001 14.4863C58.2814 14.4863 56.5918 14.9292 55.0941 15.7724C53.5965 16.6156 52.3415 17.8305 51.4501 19.3Z" fill="#F5963D" fill-opacity="0.2" stroke="#F5963D" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="Vector_2" d="M60 45V65" stroke="#F5963D" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="Vector_3" d="M60 85H60.05" stroke="#F5963D" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+</svg>

@@ -1,0 +1,121 @@
+import { useCallback, useEffect, useState } from "react";
+import "./PaymentHistory.scss";
+import { ReactComponent as LeftArrow } from "../../assets/Icons/arrow-left-circle.svg";
+import { ReactComponent as CloseIcon } from "../../assets/Icons/x.svg";
+import StudentProfile from "../../Components/Profile";
+import PaymentDetails from "../../Components/PaymentDetails";
+import { collection, getDocs, query } from "firebase/firestore";
+import { useNavigate, useParams } from "react-router-dom";
+import { db } from "../../utils/firebase";
+import { INewAdmission } from "../../utils/types";
+import Recipt from "../../Components/Recipt";
+import moment from "moment";
+
+const PaymentHistory = () => {
+  const navigate = useNavigate();
+  const [openHistory, setOpenHistory] = useState(true);
+  const [data, setData] = useState<INewAdmission>();
+  const [openRecipt, setOpenRecipt] = useState(false);
+  const [selectedFees, setSelectedFees] = useState<number[]>();
+  const [totalFees, setTotalFees] = useState<number>();
+  const [receiptNumber, setReceiptNumber] = useState<number>();
+  const { id } = useParams();
+
+  const getData = useCallback(async () => {
+    const q = query(collection(db, "NewAdmission"));
+    const querySnapshot = await getDocs(q);
+    const fetchedData = querySnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...(doc.data() as Omit<INewAdmission, "id">),
+    }));
+    const filteredData = fetchedData.find((f) => f.id === id);
+    console.log(filteredData);
+    setData(filteredData);
+  }, []);
+
+  useEffect(() => {
+    getData();
+  }, [getData]);
+
+  return (
+    <div className="payment-history-container">
+      <div className="mx">
+        <div className="payment-history-wrapper">
+          <LeftArrow
+            onClick={() => navigate(-1)}
+            style={{ cursor: "pointer" }}
+          />
+          {openRecipt ? (
+            <Recipt
+              id={id}
+              selectedFees={selectedFees as number[]}
+              totalFees={totalFees}
+              receiptNumber={receiptNumber}
+            />
+          ) : (
+            <div className="details">
+              <StudentProfile id={id} />
+              {openHistory ? (
+                <PaymentDetails
+                  setOpenRecipt={setOpenRecipt}
+                  setOpenHistory={setOpenHistory}
+                  setSelectedFees={setSelectedFees}
+                  setTotalFees={setTotalFees}
+                  setReceiptNumber={setReceiptNumber}
+                  id={id}
+                />
+              ) : (
+                <div className="history">
+                  <div className="title">
+                    <h3>Payment History</h3>
+                    <CloseIcon
+                      style={{ cursor: "pointer" }}
+                      onClick={() => setOpenHistory(true)}
+                    />
+                  </div>
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>SESSION</th>
+                        <th>PAID DATE</th>
+                        <th>AMOUNT</th>
+                        <th>RECIEPT</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {data?.feeDetails.map(
+                        (f, i) =>
+                          f.state && (
+                            <tr key={i}>
+                              <td style={{ textTransform: "capitalize" }}>
+                                {f.name}
+                              </td>
+                              <td>
+                                {moment(f.updatedDate).format("MMM DD,S YYYY")}
+                              </td>
+                              <td>{Number(f.amount).toLocaleString()}</td>
+
+                              <td
+                                style={{
+                                  textDecoration: "underline",
+                                  cursor: "pointer",
+                                }}
+                              >
+                                DOWNLOAD
+                              </td>
+                            </tr>
+                          )
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default PaymentHistory;

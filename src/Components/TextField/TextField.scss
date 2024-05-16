@@ -1,0 +1,61 @@
+.form_input {
+  display: flex;
+  flex-direction: column;
+  .field {
+    border: 1px solid var(--border-primary);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    .text-right-icon {
+      padding-right: 15px;
+    }
+    .text-left-icon {
+      padding-left: 15px;
+      padding-right: 8px;
+      border-right: 1px solid var(--border-primary);
+    }
+  }
+  &-label {
+    font-size: 1.6rem;
+    color: var(--text-primary);
+    margin-bottom: 0.75rem;
+    font-family: var(--font-regular);
+  }
+
+  input,
+  textarea {
+    background-color: var(--input-background);
+    color: var(--text-primary);
+    padding: 1.6rem;
+    font-size: 1.4rem;
+    border: none;
+    outline: none;
+    width: 100%;
+    border-radius: 5px;
+    font-family: var(--font-light);
+  }
+  input[type="date"]::-webkit-calendar-picker-indicator,
+  input[type="file"]::-webkit-file-upload-button {
+    background: transparent;
+    bottom: 0;
+    color: transparent;
+    cursor: pointer;
+    height: auto;
+    left: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: auto;
+    border: none;
+  }
+  textarea {
+    resize: none;
+  }
+}
+
+.form_input-error {
+  padding-top: 0.5rem;
+  font-size: 1.4rem;
+  color: var(--text-error);
+}
