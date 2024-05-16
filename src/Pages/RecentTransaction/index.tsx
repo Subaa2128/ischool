@@ -88,68 +88,35 @@ const RecentTransaction = () => {
       return;
     }
 
-    let tempData: INewAdmission[] = data;
+    let tempData = data;
 
     if (searchData !== "") {
-      const type = determineInputType(searchData);
-
-      if (type === "number") {
-        tempData = tempData
-          .map((item) => {
-            const filteredFeeDetails = item.feeDetails.filter(
-              (feeDetail: FeeDetail) => {
-                return feeDetail.reciptNo.includes(searchData);
-              }
-            );
-            const matchesAdmissionNumber = item.admission.admissionNo
-              .toLowerCase()
-              .includes(searchData.toLowerCase());
-            const matchesName = item.student.nameInEnglish
-              .toLowerCase()
-              .includes(searchData.toLowerCase());
-
-            return {
-              ...item,
-              feeDetails: filteredFeeDetails,
-              matches:
-                matchesAdmissionNumber ||
-                matchesName ||
-                filteredFeeDetails.length > 0,
-            };
-          })
-          .filter((item: any) => item.matches)
-          .map((item: any) => {
-            const { matches, ...rest } = item; // remove the temporary 'matches' property
-            return rest;
-          });
-      }
-      tempData = tempData
-        .map((item) => {
-          const filteredFeeDetails = item.feeDetails.filter(
+      tempData = data
+        .filter((item) => {
+          if (determineInputType(searchData) !== "number") {
+            return item.student.nameInEnglish.includes(searchData);
+          } else return item;
+        })
+        .filter((item) => {
+          if (determineInputType(searchData) === "number") {
+            return String(item.admission.admissionNo).includes(searchData);
+          } else return item;
+        })
+        .map((item: any) => {
+          console.log(item);
+          // Filter feeDetails based on the condition
+          let filteredFeeDetails = item.feeDetails.filter(
             (feeDetail: FeeDetail) => {
-              return feeDetail.reciptNo.includes(searchData);
+              if (searchData.length > 3) {
+                return String(feeDetail.reciptNo).includes(searchData);
+              } else return feeDetail;
             }
           );
-          const matchesAdmissionNumber = item.admission.admissionNo
-            .toLowerCase()
-            .includes(searchData.toLowerCase());
-          const matchesName = item.student.nameInEnglish
-            .toLowerCase()
-            .includes(searchData.toLowerCase());
-
+          // Replace the feeDetails array with the filtered array
           return {
             ...item,
             feeDetails: filteredFeeDetails,
-            matches:
-              matchesAdmissionNumber ||
-              matchesName ||
-              filteredFeeDetails.length > 0,
           };
-        })
-        .filter((item: any) => item.matches)
-        .map((item: any) => {
-          const { matches, ...rest } = item; // remove the temporary 'matches' property
-          return rest;
         });
     }
     if (searchDateOfAdmission !== "") {
