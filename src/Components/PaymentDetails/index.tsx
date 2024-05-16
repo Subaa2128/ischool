@@ -173,6 +173,7 @@ const PaymentDetails: React.FC<IPaymentDetails> = ({
               cancel
             </Button>
             <Button
+              disabled={admissionfeeState.length === 0}
               variant="primary"
               onClick={() => [setOpenRecipt(true), handleSubmit()]}
             >

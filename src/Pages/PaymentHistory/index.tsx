@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import "./PaymentHistory.scss";
 import { ReactComponent as LeftArrow } from "../../assets/Icons/arrow-left-circle.svg";
 import { ReactComponent as CloseIcon } from "../../assets/Icons/x.svg";
@@ -10,10 +10,16 @@ import { db } from "../../utils/firebase";
 import { INewAdmission } from "../../utils/types";
 import Recipt from "../../Components/Recipt";
 import moment from "moment";
-import html2canvas from "html2canvas";
-import jsPDF from "jspdf";
 import numberToWords from "number-to-words";
-import { usePDF } from "react-to-pdf";
+
+import {
+  Page,
+  Text,
+  View,
+  Document,
+  StyleSheet,
+  pdf,
+} from "@react-pdf/renderer";
 
 const PaymentHistory = () => {
   const navigate = useNavigate();
@@ -23,10 +29,6 @@ const PaymentHistory = () => {
   const [selectedFees, setSelectedFees] = useState<number[]>();
   const [totalFees, setTotalFees] = useState<number>();
   const [receiptNumber, setReceiptNumber] = useState<number>();
-  const [selectedName, setSelectedName] = useState<string>("");
-  const [loading, setLoading] = useState(false);
-  const divToPrintRef = useRef(null);
-  const { toPDF, targetRef } = usePDF({ filename: "page.pdf" });
   const { id } = useParams();
 
   const getData = useCallback(async () => {
@@ -39,30 +41,106 @@ const PaymentHistory = () => {
     const filteredData = fetchedData.find((f) => f.id === id);
     console.log(filteredData);
     setData(filteredData);
-  }, []);
+  }, [id]);
 
   useEffect(() => {
     getData();
   }, [getData]);
 
-  const downloadDocument = async () => {
-    const input = divToPrintRef.current;
+  const generatePdf = async (name: string) => {
+    console.log(name);
+    const feeDetail = data?.feeDetails.find(
+      (item) => item.name.toLowerCase() === name.toLowerCase()
+    );
+    console.log(feeDetail);
 
-    if (!input) return;
+    const number = numberToWords.toWords(Number(feeDetail?.amount));
+    console.log(number);
 
-    await html2canvas(input).then((canvas) => {
-      const imgData = canvas.toDataURL("image/png");
-      const pdf = new jsPDF();
-      pdf.addImage(imgData, "JPEG", 10, 10, 190, 270);
-      pdf.save("download.pdf");
-    });
-    setLoading(false);
-  };
+    const pdfBlob = await pdf(
+      <Document>
+        <Page style={styles.page} size="A4">
+          <View style={styles.reciptContent}>
+            <View style={styles.heading}>
+              <Text>Indian Matriculation Hr. Sec. School</Text>
+            </View>
 
-  const handleDownload = async () => {
-    setTimeout(() => {
-      toPDF();
-    }, 3000);
+            <View style={styles.heading}>
+              <Text style={styles.text}>
+                No. 58, 18th Cross Street Kaikalan Chavadi, Tambaram Sanatorium,
+              </Text>
+            </View>
+            <View style={styles.heading}>
+              <Text style={styles.text}> Chennai - 600 047.</Text>
+            </View>
+            <View style={styles.feeRecipt}>
+              <Text style={styles.heading2}>Fee Receipt</Text>
+            </View>
+            <View style={styles.border}></View>
+            <View style={styles.reciptDetails}>
+              <View style={styles.reciptDetail}>
+                <Text style={styles.text}>Receipt No</Text>
+                <Text style={styles.heading}>{feeDetail?.reciptNo}</Text>
+              </View>
+              <View style={styles.reciptDetail}>
+                <Text style={styles.text}>Admission No</Text>
+                <Text style={styles.heading}>
+                  {data?.admission.admissionNo}
+                </Text>
+              </View>
+
+              <View style={styles.reciptDetail}>
+                <Text style={styles.text}>Date</Text>
+                <Text style={styles.heading}>
+                  {moment().format("MM-DD-YYYY")}
+                </Text>
+              </View>
+            </View>
+            <View style={styles.reciptDetails}>
+              <View style={styles.reciptDetail}>
+                <Text style={styles.text}>Name</Text>
+                <Text style={styles.heading}>
+                  {data?.student.nameInEnglish}
+                </Text>
+              </View>
+              <View style={styles.reciptDetail}>
+                <Text style={styles.text}>Grade</Text>
+                <Text style={styles.heading}>{data?.admission.grade}</Text>
+              </View>
+              <View style={styles.reciptDetail}>
+                <Text style={styles.text}>Academic year</Text>
+                <Text style={styles.heading}>
+                  {data?.admission.academicYear}
+                </Text>
+              </View>
+            </View>
+
+            <View style={styles.border}></View>
+            <View>
+              <View style={styles.detail}>
+                <Text style={styles.text}>{feeDetail?.name}</Text>
+                <Text style={styles.heading}>{feeDetail?.amount}.00</Text>
+              </View>
+              <View style={styles.border}></View>
+              <View>
+                <View style={styles.detail}>
+                  <Text style={styles.text}>Total</Text>
+                  <Text style={styles.heading}>{feeDetail?.amount}.00</Text>
+                </View>
+              </View>
+              <View style={styles.border}></View>
+            </View>
+            <View style={styles.heading}>
+              <Text style={styles.text}>In words {number} only.</Text>
+            </View>
+            <View style={styles.signature}>
+              <Text style={styles.text}>Signature of cashier</Text>
+            </View>
+          </View>
+        </Page>
+      </Document>
+    ).toBlob();
+    window.open(URL.createObjectURL(pdfBlob));
   };
 
   return (
@@ -122,106 +200,20 @@ const PaymentHistory = () => {
                                 {moment(f.updatedDate).format("MMM DD,S YYYY")}
                               </td>
                               <td>{Number(f.amount).toLocaleString()}</td>
-                              <LoadingState
-                                handleDownload={handleDownload}
-                                loading={loading}
-                                name={f.name}
-                                setLoading={setLoading}
-                                setSelectedName={setSelectedName}
-                              />
+
+                              <td
+                                style={{
+                                  cursor: "pointer",
+                                }}
+                                onClick={() => [generatePdf(f.name)]}
+                              >
+                                DOWNLOAD
+                              </td>
                             </tr>
                           )
                       )}
                     </tbody>
                   </table>
-                  {/* <div
-                    className=""
-                    style={{
-                      background: "red",
-                      position: "relative",
-                      zIndex: 10,
-                    }}
-                  >
-                    <div
-                      className="recipt-content"
-                      style={{ position: "absolute" }}
-                      ref={targetRef}
-                    >
-                      <h3>Indian Matriculation Hr. Sec. School</h3>
-                      <p>
-                        No. 58, 18th Cross Street Kaikalan Chavadi, Tambaram
-                        Sanatorium,
-                      </p>
-                      <p> Chennai - 600 047.</p>
-                      <div className="fee-recipt">
-                        <h2>Fee Receipt</h2>
-                      </div>
-                      <div className="border"></div>
-                      <div className="recipt-details">
-                        <div className="recipt-detail">
-                          <p>Receipt No</p>
-                          <h3>{receiptNumber}</h3>
-                        </div>
-                        <div className="recipt-detail">
-                          <p>Admission No</p>
-                          <h3>{data?.admission.admissionNo}</h3>
-                        </div>
-
-                        <div className="recipt-detail">
-                          <p>Date</p>
-                          <h3>{moment().format("MM-DD-YYYY")}</h3>
-                        </div>
-                        <div className="recipt-detail">
-                          <p>Name</p>
-                          <h3>{data?.student.nameInEnglish}</h3>
-                        </div>
-                        <div className="recipt-detail">
-                          <p>Grade</p>
-                          <h3>{data?.admission.grade}</h3>
-                        </div>
-                        <div className="recipt-detail">
-                          <p>Academic year</p>
-                          <h3>{data?.admission.academicYear}</h3>
-                        </div>
-                      </div>
-                      <div className="border"></div>
-                      {data?.feeDetails
-                        .filter(
-                          (s) =>
-                            s.name.toLowerCase() === selectedName.toLowerCase()
-                        )
-                        .map((f, i) => (
-                          <>
-                            <div className="admision-details" key={i}>
-                              <div className="detail">
-                                <p>{f.name}</p>
-                                <h3>{Number(f.amount)}.00</h3>
-                              </div>
-
-                              <div className="border"></div>
-                              <div className="admission-setails">
-                                <div className="detail">
-                                  <p>Total</p>
-                                  <h3>{f.amount?.toLocaleString()}.00</h3>
-                                </div>
-                              </div>
-                              <div className="border"></div>
-                            </div>
-                            <p>
-                              In words{" "}
-                              <span>
-                                {numberToWords.toWords(Number(f.amount))}
-                              </span>{" "}
-                              only.
-                            </p>
-                          </>
-                        ))}
-
-                      <div className="signature">
-                        <p>Signature of cashier</p>
-                      </div>
-                    </div>
-                  </div> */}
                 </div>
               )}
             </div>
@@ -234,44 +226,76 @@ const PaymentHistory = () => {
 
 export default PaymentHistory;
 
-interface ILoading {
-  loading: boolean;
-  name: string;
-  handleDownload: () => Promise<void>;
-  setSelectedName: React.Dispatch<React.SetStateAction<string>>;
-  setLoading: React.Dispatch<React.SetStateAction<boolean>>;
-}
+const styles = StyleSheet.create({
+  page: {
+    padding: "10px 50px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    flexDirection: "column",
+    gap: "32px",
+    marginTop: "-70px",
+  },
+  heading: {
+    color: "#252525",
+    fontSize: "20px",
+    textAlign: "center",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  text: {
+    color: "#252525",
+    textAlign: "center",
+    fontSize: "14px",
+  },
+  border: {
+    margin: "24px 0",
+    borderTop: "1px solid #c7dce6",
+  },
+  reciptDetail: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "flex-start",
+    width: "100px",
+    marginTop: "10px",
+  },
+  reciptDetails: {
+    display: "flex",
+    flexDirection: "row",
+    flexWrap: "wrap",
+    columnGap: "40px",
+    rowGap: "16px",
+    justifyContent: "space-between",
+  },
 
-const LoadingState: React.FC<ILoading> = ({
-  name,
-  loading,
-  handleDownload,
-  setSelectedName,
-  setLoading,
-}) => {
-  return loading ? (
-    <td
-      style={{
-        textDecoration: "underline",
-        cursor: "pointer",
-        color: "#ddd",
-      }}
-    >
-      ...DOWNLOAD
-    </td>
-  ) : (
-    <td
-      style={{
-        textDecoration: "underline",
-        cursor: "pointer",
-      }}
-      onClick={() => [
-        setLoading(true),
-        setSelectedName(name),
-        handleDownload(),
-      ]}
-    >
-      DOWNLOAD
-    </td>
-  );
-};
+  reciptContent: {
+    border: "1px solid #c7dce6",
+    padding: "40px",
+    textAlign: "center",
+  },
+
+  feeRecipt: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  heading2: {
+    border: "1px solid #c7dce6",
+    padding: "8px 24px",
+    marginTop: "24px",
+  },
+  detail: {
+    display: "flex",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: "8px",
+  },
+  signature: {
+    marginTop: "60px",
+    display: "flex",
+    alignItems: "flex-end",
+    justifyContent: "center",
+  },
+});

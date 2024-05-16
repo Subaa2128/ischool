@@ -1,22 +1,15 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import "./RecentTransaction.scss";
 import { ReactComponent as LefTArrow } from "../../assets/Icons/arrow-left-circle.svg";
 import Search from "../../Components/Search";
-import Button from "../../Components/Button";
-import DownloadIcon from "../../assets/Icons/download.svg";
+
 import { collection, getDocs, query } from "firebase/firestore";
 import { db } from "../../utils/firebase";
 import { INewAdmission } from "../../utils/types";
 import { useNavigate } from "react-router-dom";
 import moment from "moment";
-import { toHaveAttribute } from "@testing-library/jest-dom/matchers";
-import { array } from "yup";
-import { replace } from "formik";
-import { serialize } from "v8";
 
 const EntriesPerPage = 10;
-
-type FeeDetails = [FeeDetail];
 
 type FeeDetail = {
   reciptNo: string;
@@ -93,13 +86,16 @@ const RecentTransaction = () => {
     if (searchData !== "") {
       tempData = data
         .filter((item) => {
+          console.log(searchData.toLowerCase());
           if (determineInputType(searchData) !== "number") {
-            return item.student.nameInEnglish.includes(searchData);
+            return item.student.nameInEnglish
+              .toLowerCase()
+              .startsWith(searchData.toLowerCase());
           } else return item;
         })
         .filter((item) => {
           if (determineInputType(searchData) === "number") {
-            return String(item.admission.admissionNo).includes(searchData);
+            return String(item.admission.admissionNo).startsWith(searchData);
           } else return item;
         })
         .map((item: any) => {
@@ -107,11 +103,15 @@ const RecentTransaction = () => {
           // Filter feeDetails based on the condition
           let filteredFeeDetails = item.feeDetails.filter(
             (feeDetail: FeeDetail) => {
-              if (searchData.length > 3) {
-                return String(feeDetail.reciptNo).includes(searchData);
+              if (
+                searchData.length > 3 &&
+                determineInputType(searchData) === "number"
+              ) {
+                return String(feeDetail.reciptNo).startsWith(searchData);
               } else return feeDetail;
             }
           );
+
           // Replace the feeDetails array with the filtered array
           return {
             ...item,
@@ -204,12 +204,8 @@ const RecentTransaction = () => {
     searchData,
   ]);
 
-  // const startIndex = (currentPage - 1) * EntriesPerPage;
-  // const endIndex = startIndex + EntriesPerPage;
-  // const currentData =
-  //   filterData.length !== 0
-  //     ? filterData.slice(startIndex, endIndex)
-  //     : data.slice(startIndex, endIndex);
+  const startIndex = (currentPage - 1) * EntriesPerPage;
+  const endIndex = currentPage * EntriesPerPage;
 
   console.log(filterData);
   const getData = useCallback(async () => {
@@ -284,114 +280,10 @@ const RecentTransaction = () => {
                   <th>DETAILS</th>
                 </tr>
               </thead>
-              {/* <tbody>
-                {filterSearch.length === 0 &&
-                filtersearchDateOfAdmission.length === 0 &&
-                filterGrade.length === 0
-                  ? currentData.map((f, i) => (
-                      <tr key={i}>
-                        <td>{f.admission.admissionNo}</td>
-                        <td>
-                          {moment(f.feeDetails.admisionFee.updatedDate).format(
-                            "dd-mm-yy"
-                          )}
-                        </td>
-                        <td>{f.student.nameInEnglish}</td>
-                        <td>{f.admission.admissionNo}</td>
-                        <td>Admission fee</td>
-                        <td>233 INR</td>
-                        <td
-                          style={{
-                            textDecoration: "underline",
-                            cursor: "pointer",
-                            color: "#455A64",
-                          }}
-                          onClick={() => navigate(`/paymenthistory/${f.id}`)}
-                        >
-                          View
-                        </td>
-                      </tr>
-                    ))
-                  : filterSearch.length === 0
-                  ? filtersearchDateOfAdmission.map((f, i) => (
-                      <tr key={i}>
-                        <td>{f.admission.admissionNo}</td>
-                        <td>
-                          {" "}
-                          {moment(f.feeDetails.admisionFee.updatedDate).format(
-                            "dd-mm-yy"
-                          )}
-                        </td>
-                        <td>{f.student.nameInEnglish}</td>
-                        <td>{f.admission.admissionNo}</td>
-                        <td>Admission fee</td>
-                        <td>5000 INR</td>
-                        <td
-                          style={{
-                            textDecoration: "underline",
-                            cursor: "pointer",
-                            color: "#455A64",
-                          }}
-                          onClick={() => navigate(`/paymenthistory/${f.id}`)}
-                        >
-                          View
-                        </td>
-                      </tr>
-                    ))
-                  : filterGrade.length === 0
-                  ? filterSearch.map((f, i) => (
-                      <tr key={i}>
-                        <td>{f.admission.admissionNo}</td>
-                        <td>
-                          {moment(f.feeDetails.admisionFee.updatedDate).format(
-                            "dd-mm-yy"
-                          )}
-                        </td>
-                        <td>{f.student.nameInEnglish}</td>
-                        <td>{f.admission.admissionNo}</td>
-                        <td>Admission fee</td>
-                        <td>5000 INR</td>
-                        <td
-                          style={{
-                            textDecoration: "underline",
-                            cursor: "pointer",
-                            color: "#455A64",
-                          }}
-                          onClick={() => navigate(`/paymenthistory/${f.id}`)}
-                        >
-                          View
-                        </td>
-                      </tr>
-                    ))
-                  : filterGrade.map((f, i) => (
-                      <tr key={i}>
-                        <td>{f.admission.admissionNo}</td>
-                        <td>
-                          {" "}
-                          {moment(f.feeDetails.admisionFee.updatedDate).format(
-                            "dd-mm-yy"
-                          )}
-                        </td>
-                        <td>{f.student.nameInEnglish}</td>
-                        <td>{f.admission.admissionNo}</td>
-                        <td>Admission fee</td>
-                        <td>{f.feeDetails.admisionFee.amount}</td>
-                        <td
-                          style={{
-                            textDecoration: "underline",
-                            cursor: "pointer",
-                            color: "#455A64",
-                          }}
-                          onClick={() => navigate(`/paymenthistory/${f.id}`)}
-                        >
-                          View
-                        </td>
-                      </tr>
-                    ))}
-              </tbody> */}
+
               <tbody>
                 {filterData.length !== 0
-                  ? filterData.map((f, i) =>
+                  ? filterData.slice(startIndex, endIndex).map((f, i) =>
                       f.feeDetails
                         .filter((d) => d.state === true)
                         .map((s, index) => (
@@ -419,7 +311,7 @@ const RecentTransaction = () => {
                           </tr>
                         ))
                     )
-                  : data.map((f, i) =>
+                  : data.slice(startIndex, endIndex).map((f, i) =>
                       f.feeDetails
                         .filter((d) => d.state === true)
                         .map((s, index) => (
@@ -477,14 +369,14 @@ const RecentTransaction = () => {
                 </li>
               </ul>
             </div>
-            <div className="download">
+            {/* <div className="download">
               <Button
                 variant="primary"
                 leftIcon={<img src={DownloadIcon} alt="" />}
               >
                 Download statement
               </Button>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>

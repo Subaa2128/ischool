@@ -1,131 +1,84 @@
-import React, { useState } from "react";
-import {
-  Page,
-  Text,
-  View,
-  Document,
-  StyleSheet,
-  PDFViewer,
-  Font,
-  PDFDownloadLink,
-} from "@react-pdf/renderer";
+import React from "react";
+import { Page, Text, View, Document, StyleSheet } from "@react-pdf/renderer";
 import moment from "moment";
 
-interface IPdf {
-  admissionNo: string;
-  nameInEnglish: string;
-  grade: string;
-  academicYear: string;
-  feeDetails: [
-    {
-      reciptNo: string;
-      name: string;
-      updatedDate: Date;
-      amount: string;
-      state: boolean;
-    }
-  ];
-  totalFee: string;
-  words: string;
-}
-
-const Pdf: React.FC<IPdf> = ({
-  academicYear,
-  admissionNo,
-  feeDetails,
-  grade,
-  nameInEnglish,
-  totalFee,
-  words,
-}) => {
-  console.log(
-    academicYear,
-    admissionNo,
-    feeDetails,
-    grade,
-    nameInEnglish,
-    totalFee,
-    words
-  );
+const Pdf: React.FC = ({}) => {
   return (
-    <div>
-      <PDFViewer style={styles.pdfViewer}>
-        <Document>
-          <Page style={styles.page}>
-            <View style={styles.reciptContent}>
-              <Text style={styles.heading}>
-                Indian Matriculation Hr. Sec. School
-              </Text>
-              <Text style={styles.text}>
-                No. 58, 18th Cross Street Kaikalan Chavadi, Tambaram Sanatorium,
-              </Text>
-              <Text> Chennai - 600 047.</Text>
-              <View style={styles.feeRecipt}>
-                <Text style={styles.heading2}>Fee Receipt</Text>
-              </View>
-              <View style={styles.border}></View>
-              <View style={styles.reciptDetails}>
-                <View style={styles.reciptDetail}>
-                  <Text style={styles.text}>Receipt No</Text>
-                  {/* <Text style={styles.heading}>{feeDetails[0].reciptNo}</Text> */}
-                </View>
-                <View style={styles.reciptDetail}>
-                  <Text style={styles.text}>Admission No</Text>
-                  <Text style={styles.heading}>{admissionNo}</Text>
-                </View>
-
-                <View style={styles.reciptDetail}>
-                  <Text style={styles.text}>Date</Text>
-                  <Text style={styles.heading}>
-                    {moment().format("MM-DD-YYYY")}
-                  </Text>
-                </View>
-                <View style={styles.reciptDetail}>
-                  <Text style={styles.text}>Name</Text>
-                  <Text style={styles.heading}>{nameInEnglish}</Text>
-                </View>
-                <View style={styles.reciptDetail}>
-                  <Text style={styles.text}>Grade</Text>
-                  <Text style={styles.heading}>{grade}</Text>
-                </View>
-                <View style={styles.reciptDetail}>
-                  <Text style={styles.text}>Academic year</Text>
-                  <Text style={styles.heading}>{academicYear}</Text>
-                </View>
-              </View>
-              <View style={styles.border}></View>
-              <View>
-                {feeDetails.map(
-                  (f, i) =>
-                    f.state && (
-                      <View key={i} style={styles.detail}>
-                        <Text style={styles.text}>{f.name}</Text>
-                        <Text style={styles.heading}>{f.amount}.00</Text>
-                      </View>
-                    )
-                )}
-
-                <View style={styles.border}></View>
-                <View>
-                  <View style={styles.detail}>
-                    <Text style={styles.text}>Total</Text>
-                    <Text style={styles.heading}>{totalFee}.00</Text>
-                  </View>
-                </View>
-                <View style={styles.border}></View>
-              </View>
-
-              <Text style={styles.text}>
-                In words <span>{words} </span> only.
-              </Text>
-              <View>
-                <Text style={styles.text}>Signature of cashier</Text>
-              </View>
+    <Document>
+      <Page style={styles.page}>
+        <View style={styles.reciptContent}>
+          <Text style={styles.heading}>
+            Indian Matriculation Hr. Sec. School
+          </Text>
+          <Text style={styles.text}>
+            No. 58, 18th Cross Street Kaikalan Chavadi, Tambaram Sanatorium,
+          </Text>
+          <Text> Chennai - 600 047.</Text>
+          <View style={styles.feeRecipt}>
+            <Text style={styles.heading2}>Fee Receipt</Text>
+          </View>
+          <View style={styles.border}></View>
+          <View style={styles.reciptDetails}>
+            <View style={styles.reciptDetail}>
+              <Text style={styles.text}>Receipt No</Text>
+              {/* <Text style={styles.heading}>{feeDetails[0].reciptNo}</Text> */}
             </View>
-          </Page>
-        </Document>
-      </PDFViewer>
-    </div>
+            <View style={styles.reciptDetail}>
+              <Text style={styles.text}>Admission No</Text>
+              {/* <Text style={styles.heading}>{admissionNo}</Text> */}
+            </View>
+
+            <View style={styles.reciptDetail}>
+              <Text style={styles.text}>Date</Text>
+              <Text style={styles.heading}>
+                {moment().format("MM-DD-YYYY")}
+              </Text>
+            </View>
+            <View style={styles.reciptDetail}>
+              <Text style={styles.text}>Name</Text>
+              {/* <Text style={styles.heading}>{nameInEnglish}</Text> */}
+            </View>
+            <View style={styles.reciptDetail}>
+              <Text style={styles.text}>Grade</Text>
+              {/* <Text style={styles.heading}>{grade}</Text> */}
+            </View>
+            <View style={styles.reciptDetail}>
+              <Text style={styles.text}>Academic year</Text>
+              {/* <Text style={styles.heading}>{academicYear}</Text> */}
+            </View>
+          </View>
+          <View style={styles.border}></View>
+          {/* {feeDetails.map(
+            (f, i) =>
+              f.state &&
+              f.name === name && (
+                <View>
+                  <View key={i} style={styles.detail}>
+                    <Text style={styles.text}>{f.name}</Text>
+                    <Text style={styles.heading}>{f.amount}.00</Text>
+                  </View>
+
+                  <View style={styles.border}></View>
+                  <View>
+                    <View style={styles.detail}>
+                      <Text style={styles.text}>Total</Text>
+                      <Text style={styles.heading}>{f.amount}.00</Text>
+                    </View>
+                  </View>
+                  <View style={styles.border}></View>
+                </View>
+              )
+          )} */}
+
+          <Text style={styles.text}>
+            In words <span>name </span> only.
+          </Text>
+          <View>
+            <Text style={styles.text}>Signature of cashier</Text>
+          </View>
+        </View>
+      </Page>
+    </Document>
   );
 };
 
