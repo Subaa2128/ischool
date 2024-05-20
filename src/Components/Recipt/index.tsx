@@ -178,6 +178,7 @@ const Recipt: React.FC<IRecipt> = ({
               variant="primary"
               onClick={() => downloadDocument()}
               leftIcon={<Download />}
+              style={{ background: "none" }}
             >
               Download Recipt
             </Button>
