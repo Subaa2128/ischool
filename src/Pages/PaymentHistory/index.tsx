@@ -29,6 +29,9 @@ const PaymentHistory = () => {
   const [selectedFees, setSelectedFees] = useState<number[]>();
   const [totalFees, setTotalFees] = useState<number>();
   const [receiptNumber, setReceiptNumber] = useState<number>();
+  const [feeName, setFeeName] = useState("");
+  const [feeAmount, setFeeAmount] = useState("");
+  const [feeValue, setFeeValue] = useState(false);
   const { id } = useParams();
 
   const getData = useCallback(async () => {
@@ -157,6 +160,9 @@ const PaymentHistory = () => {
               selectedFees={selectedFees as number[]}
               totalFees={totalFees}
               receiptNumber={receiptNumber}
+              feeName={feeName}
+              feeAmount={feeAmount}
+              feeValue={feeValue}
             />
           ) : (
             <div className="details">
@@ -168,6 +174,12 @@ const PaymentHistory = () => {
                   setSelectedFees={setSelectedFees}
                   setTotalFees={setTotalFees}
                   setReceiptNumber={setReceiptNumber}
+                  setFeeAmount={setFeeAmount}
+                  setFeeName={setFeeName}
+                  setFeeValue={setFeeValue}
+                  feeName={feeName}
+                  feeAmount={feeAmount}
+                  feeValue={feeValue}
                   id={id}
                 />
               ) : (

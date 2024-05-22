@@ -29,6 +29,12 @@
     url("./assets/Fonts/Montserrat-Light.ttf") format("truetype");
 }
 
+@font-face {
+  font-family: "Gilroy-medium";
+  src: local("GilroyMedium"),
+    url("./assets/Fonts/Gilroy-Medium.ttf") format("truetype");
+}
+
 :root {
   /* FONTS */
   --font-regular: "Montserrat-regular";
@@ -36,7 +42,7 @@
   --font-light: "Montserrat-light";
   --font-medium: "Montserrat-medium";
   --font-black: "Montserrat-black";
-
+  --font-gilroy: "Gilroy-medium";
   /* COLOR-PALETTE */
   --background: #fff;
   --background-login: #d9d9d9;

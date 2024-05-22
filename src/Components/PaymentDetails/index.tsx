@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import "./PaymentDetails.scss";
 import Button from "../Button";
 import { useNavigate } from "react-router-dom";
@@ -13,10 +13,22 @@ interface IPaymentDetails {
   setSelectedFees: React.Dispatch<React.SetStateAction<number[] | undefined>>;
   setTotalFees: React.Dispatch<React.SetStateAction<number | undefined>>;
   setReceiptNumber: React.Dispatch<React.SetStateAction<number | undefined>>;
+  setFeeName: React.Dispatch<React.SetStateAction<string>>;
+  setFeeAmount: React.Dispatch<React.SetStateAction<string>>;
+  setFeeValue: React.Dispatch<React.SetStateAction<boolean>>;
+  feeName?: string;
+  feeAmount?: string;
+  feeValue?: boolean;
   id?: string;
 }
 const PaymentDetails: React.FC<IPaymentDetails> = ({
   id,
+  feeAmount,
+  feeName,
+  feeValue,
+  setFeeAmount,
+  setFeeName,
+  setFeeValue,
   setOpenRecipt,
   setOpenHistory,
   setSelectedFees,
@@ -36,10 +48,10 @@ const PaymentDetails: React.FC<IPaymentDetails> = ({
     let tempFee = 0;
     console.log(array);
 
-    const number = array.forEach((f) => {
-      console.log("Loop", f);
-      tempFee += Number(data?.feeDetails[f].amount);
-    });
+    // const number = array.forEach((f) => {
+    //   console.log("Loop", f);
+    //   tempFee += Number(data?.feeDetails[f].amount);
+    // });
 
     setTotalFee(tempFee);
     setSelectedFees(array);
@@ -55,7 +67,7 @@ const PaymentDetails: React.FC<IPaymentDetails> = ({
     }));
     const filteredData = fetchedData.find((f) => f.id === id);
     setData(filteredData);
-  }, []);
+  }, [id]);
 
   useEffect(() => {
     getData();
@@ -84,6 +96,15 @@ const PaymentDetails: React.FC<IPaymentDetails> = ({
           });
         }
       });
+      if (feeName && feeAmount) {
+        feeDetails.push({
+          name: `customfee_${feeName}`,
+          amount: feeAmount,
+          state: feeValue,
+          updatedDate: Date.now(),
+          reciptNo: receiptNumber,
+        });
+      }
       console.log(feeDetails);
 
       await updateDoc(userDocRef, {
@@ -106,6 +127,13 @@ const PaymentDetails: React.FC<IPaymentDetails> = ({
               View Payment History
             </h2>
           </div>
+          <div className="rte">
+            <h5>RTE Student</h5>
+            <label className="switch">
+              <input type="checkbox" />
+              <span className="slider round"></span>
+            </label>
+          </div>
           <table>
             <thead>
               <tr>
@@ -118,9 +146,22 @@ const PaymentDetails: React.FC<IPaymentDetails> = ({
             <tbody className="table-body">
               {data?.feeDetails.map((f, i) => (
                 <tr className="admission-fee" key={i}>
-                  <td className="row">{f.name}</td>
-                  <td className="row">{moment().format("MMM DD, YYYY")}</td>
-                  <td className="row">
+                  <td
+                    className="row"
+                    style={{ textTransform: "capitalize", fontWeight: 900 }}
+                  >
+                    {f.name}
+                  </td>
+                  <td
+                    className="row"
+                    style={{ textTransform: "capitalize", fontWeight: 900 }}
+                  >
+                    {moment().format("MMM DD, YYYY")}
+                  </td>
+                  <td
+                    className="row"
+                    style={{ textTransform: "capitalize", fontWeight: 900 }}
+                  >
                     {Number(f.amount).toLocaleString()}INR
                   </td>
 
@@ -160,6 +201,37 @@ const PaymentDetails: React.FC<IPaymentDetails> = ({
                   </td>
                 </tr>
               ))}
+              <tr className="admission-fee">
+                <td className="row" style={{ fontWeight: 900 }}>
+                  CustomFee
+                </td>
+                <td className="row">
+                  <input
+                    type="text"
+                    placeholder="Enter fee name"
+                    name=""
+                    id=""
+                    onChange={(e) => setFeeName(e.target.value)}
+                  />
+                </td>
+                <td className="row">
+                  <input
+                    type="text"
+                    placeholder="Enter amount"
+                    name=""
+                    id=""
+                    onChange={(e) => setFeeAmount(e.target.value)}
+                  />
+                </td>
+                <td className="row">
+                  <input
+                    type="checkbox"
+                    name=""
+                    id=""
+                    onChange={(e) => setFeeValue(e.target.checked)}
+                  />
+                </td>
+              </tr>
             </tbody>
           </table>
         </div>
@@ -173,7 +245,11 @@ const PaymentDetails: React.FC<IPaymentDetails> = ({
               cancel
             </Button>
             <Button
-              disabled={admissionfeeState.length === 0}
+              disabled={
+                admissionfeeState.length === 0 &&
+                feeAmount === "" &&
+                feeName === ""
+              }
               variant="primary"
               onClick={() => [setOpenRecipt(true), handleSubmit()]}
             >

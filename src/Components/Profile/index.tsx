@@ -32,7 +32,7 @@ const StudentProfile: React.FC<IStudentProfile> = ({ id }) => {
     }));
     const filteredData = fetchedData.find((f) => f.id === id);
     setData(filteredData);
-  }, []);
+  }, [id]);
 
   useEffect(() => {
     getData();
@@ -127,10 +127,6 @@ const StudentProfile: React.FC<IStudentProfile> = ({ id }) => {
                   ? `Profile deleted successfully!`
                   : `Do you want to delete this profile?`}
               </h3>
-              <p>
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-                eiusmod tempor incididunt ut labore et dolore magna aliqua.
-              </p>
             </div>
             <div className="button">
               {deletedProfile ? (

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { v4 } from "uuid";
 import "./NewAdmission.scss";
 import { ReactComponent as LeftArrow } from "../../assets/Icons/arrow-left-circle.svg";
@@ -18,6 +18,8 @@ import { useNavigate, useParams } from "react-router-dom";
 import { ReactComponent as DropDown } from "../../assets/Icons/chevron-down.svg";
 import { ReactComponent as Calender } from "../../assets/Icons/calendar.svg";
 import { ReactComponent as Upload } from "../../assets/Icons/upload.svg";
+import { ReactComponent as Minus } from "../../assets/Icons/minus.svg";
+import { ReactComponent as Plus } from "../../assets/Icons/plus.svg";
 
 import { validationSchema, initialState } from "./SchemaAndValidation";
 import {
@@ -42,6 +44,14 @@ const NewAdmission = () => {
   const [term1Fee, setTerm1Fee] = useState("");
   const [term2Fee, setTerm2Fee] = useState("");
   const [term3Fee, setTerm3Fee] = useState("");
+  const [fatherDetails, setFatherDetails] = useState(false);
+  const [motherDetails, setMotherDetails] = useState(false);
+
+  const [clickDateOfAdmission, setClickDateOfAdmission] = useState(false);
+  const [clickDateOfBirth, setClickDateOfBirth] = useState(false);
+  const [clickMotherDateOfBirth, setClickMotherDateOfBirth] = useState(false);
+  const [clickFatherDateOfBirth, setClickFatherDateOfBirth] = useState(false);
+  const [clickSiblingDateOfBirth, setClickSiblingDateOfBirth] = useState(false);
 
   const [openAcademic, setOpenAcademic] = useState(false);
   const [openGrade, setOpenGrade] = useState(false);
@@ -385,7 +395,7 @@ const NewAdmission = () => {
           onSubmit={data ? handleUpdate : handleSubmit}
           enableReinitialize={true}
         >
-          {({ isSubmitting, values, setFieldValue }) => (
+          {({ values, setFieldValue }) => (
             <FormikForm>
               <div className="new-admission-wrapper">
                 <div className="navgation">
@@ -416,7 +426,7 @@ const NewAdmission = () => {
                     >
                       <TextField
                         name="staff.staffName"
-                        placeholder="staffName"
+                        placeholder="Name of the parent"
                       />
                     </div>
                   )}
@@ -435,7 +445,7 @@ const NewAdmission = () => {
                         }}
                         onClick={() => setSelectedHeader(f)}
                       >
-                        {f}
+                        {f === "previousStudy" ? "Previous study" : f}
                       </p>
                     ))}
                   </div>
@@ -446,41 +456,43 @@ const NewAdmission = () => {
                         <div className="grid">
                           <div className="grid-one">
                             <TextField
-                              type="number"
                               id="admission.applicationNo"
                               name="admission.applicationNo"
-                              placeholder="applicationNo"
+                              placeholder="Application no."
+                            />
+                            <TextField
+                              name="admission.applicationReceivedBy"
+                              placeholder="Application received by"
                             />
                             <TextField
                               type="number"
                               id="admission.admissionNo"
                               name="admission.admissionNo"
-                              placeholder="admissionNo"
+                              placeholder="Admission no."
                             />
+
+                            <TextField
+                              leftIcon={<Calender />}
+                              type={clickDateOfAdmission ? "date" : "text"}
+                              name="admission.DateOfAdmission"
+                              placeholder="Date Of Admission"
+                              onClick={() => setClickDateOfAdmission(true)}
+                            />
+
                             <TextField
                               type="number"
                               name="admission.emisNo"
-                              placeholder="emisNo"
-                            />
-                            <TextField
-                              name="admission.applicationReceivedBy"
-                              placeholder="applicationReceivedBy"
-                            />
-                            <TextField
-                              leftIcon={<Calender />}
-                              type="date"
-                              name="admission.DateOfAdmission"
-                              placeholder="DateOfAdmission"
+                              placeholder="EMIS no."
                             />
                             <TextField
                               name="admission.AdmissionRequiredFor"
-                              placeholder="AdmissionRequiredFor"
+                              placeholder="Admission required for"
                             />
                             <div className="">
                               <TextField
                                 style={{ cursor: "pointer" }}
                                 name="admission.academicYear"
-                                placeholder="academicYear"
+                                placeholder="Academic Year"
                                 value={values.admission.academicYear}
                                 rightIcon={<DropDown />}
                                 onClick={() => setOpenAcademic((m) => !m)}
@@ -493,7 +505,7 @@ const NewAdmission = () => {
                                       onClick={() => {
                                         setFieldValue(
                                           "admission.academicYear",
-                                          option.value
+                                          option.label
                                         );
                                         setOpenAcademic(false);
                                       }}
@@ -508,7 +520,7 @@ const NewAdmission = () => {
                               <TextField
                                 style={{ cursor: "pointer" }}
                                 value={values.admission.grade}
-                                placeholder="grade"
+                                placeholder="Grade"
                                 name="admission.grade"
                                 rightIcon={<DropDown />}
                                 onClick={() => setOpenGrade((m) => !m)}
@@ -521,7 +533,7 @@ const NewAdmission = () => {
                                       onClick={() => {
                                         setFieldValue(
                                           "admission.grade",
-                                          option.value
+                                          option.label
                                         ); // Set the selected value in formik field
                                         setOpenGrade(false); // Close the dropdown after selection
                                         setFeeAdmission(option.admissionFee);
@@ -545,64 +557,15 @@ const NewAdmission = () => {
                           <div className="grid-one">
                             <TextField
                               name="student.nameInEnglish"
-                              placeholder="nameInEnglish"
+                              placeholder="Name in English"
                             />
-                            <TextField
-                              name="student.nameInTamil"
-                              placeholder="nameInTamil"
-                            />
-                            <div className="">
-                              <TextField
-                                style={{ cursor: "pointer" }}
-                                value={values.student.gender}
-                                name="student.gender"
-                                placeholder="gender"
-                                rightIcon={<DropDown />}
-                                onClick={() => setOpenGender((m) => !m)}
-                              />
-                              {openGender && (
-                                <div className="options">
-                                  {gender.map((option, index) => (
-                                    <p
-                                      key={index}
-                                      onClick={() => {
-                                        setFieldValue(
-                                          "student.gender",
-                                          option.value
-                                        );
-                                        setOpenGender(false);
-                                      }}
-                                    >
-                                      {option.label}
-                                    </p>
-                                  ))}
-                                </div>
-                              )}
-                            </div>
-                            <TextField
-                              leftIcon={<Calender />}
-                              type="date"
-                              name="student.dateOfBirth"
-                              placeholder="dateOfBirth"
-                            />
-                            <TextField
-                              name="student.dataOfBirthInWords"
-                              placeholder="dataOfBirthInWords"
-                            />
-                            <TextField
-                              type="number"
-                              name="student.aadharCardNo"
-                              placeholder="aadharCardNo"
-                            />
-                          </div>
-                          <div className="grid-two">
                             <div className="">
                               <TextField
                                 rightIcon={<DropDown />}
                                 style={{ cursor: "pointer" }}
                                 value={values.student.motherTongue}
                                 name="student.motherTongue"
-                                placeholder="motherTongue"
+                                placeholder="Mother tongue"
                                 onClick={() => setOpenMotherTounge((m) => !m)}
                               />
                               {openMotherTounge && (
@@ -613,7 +576,7 @@ const NewAdmission = () => {
                                       onClick={() => {
                                         setFieldValue(
                                           "student.motherTongue",
-                                          option.value
+                                          option.label
                                         ); // Set the selected value in formik field
                                         setOpenMotherTounge(false); // Close the dropdown after selection
                                       }}
@@ -625,27 +588,69 @@ const NewAdmission = () => {
                               )}
                             </div>
                             <TextField
-                              name="student.nationality"
-                              placeholder="nationality"
+                              name="student.nameInTamil"
+                              placeholder="Name in Tamil"
                             />
                             <TextField
-                              name="student.caste"
-                              placeholder="caste"
+                              name="student.nationality"
+                              placeholder="Nationality"
                             />
+                            <div className="">
+                              <TextField
+                                style={{ cursor: "pointer" }}
+                                value={values.student.gender}
+                                name="student.gender"
+                                placeholder="Gender"
+                                rightIcon={<DropDown />}
+                                onClick={() => setOpenGender((m) => !m)}
+                              />
+                              {openGender && (
+                                <div className="options">
+                                  {gender.map((option, index) => (
+                                    <p
+                                      key={index}
+                                      onClick={() => {
+                                        setFieldValue(
+                                          "student.gender",
+                                          option.label
+                                        );
+                                        setOpenGender(false);
+                                      }}
+                                    >
+                                      {option.label}
+                                    </p>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
                             <TextField
                               name="student.bloodGroup"
-                              placeholder="bloodGroup"
+                              placeholder="Blood group"
                             />
+
+                            <TextField
+                              leftIcon={<Calender />}
+                              type={clickDateOfBirth ? "date" : "text"}
+                              name="student.dateOfBirth"
+                              placeholder="Date of birth"
+                              onClick={() => setClickDateOfBirth(true)}
+                            />
+
                             <TextField
                               name="student.religion"
-                              placeholder="religion"
+                              placeholder="Religion"
                             />
+                            <TextField
+                              name="student.dataOfBirthInWords"
+                              placeholder="Data of birth in words"
+                            />
+
                             <div className="">
                               <TextField
                                 style={{ cursor: "pointer" }}
                                 value={values.student.community}
                                 name="student.community"
-                                placeholder="community"
+                                placeholder="Community"
                                 rightIcon={<DropDown />}
                                 onClick={() => setOpenCommunity((m) => !m)}
                               />
@@ -657,7 +662,7 @@ const NewAdmission = () => {
                                       onClick={() => {
                                         setFieldValue(
                                           "student.community",
-                                          option.value
+                                          option.label
                                         ); // Set the selected value in formik field
                                         setOpenCommunity(false); // Close the dropdown after selection
                                       }}
@@ -668,229 +673,290 @@ const NewAdmission = () => {
                                 </div>
                               )}
                             </div>
+
+                            <TextField
+                              type="number"
+                              name="student.aadharCardNo"
+                              placeholder="Aadhar card no."
+                            />
+
+                            <TextField
+                              name="student.caste"
+                              placeholder="Caste"
+                            />
                           </div>
                         </div>
                       )}
                       {selectedHeader === "parent" && (
                         <div className="grid">
-                          <div className="">
-                            <h3>Father Details</h3>
-                            <div className="grid-one">
-                              <TextField
-                                name="parent.fatherDetails.name"
-                                placeholder="name"
-                              />
-                              <TextField
-                                leftIcon={<Calender />}
-                                type="date"
-                                name="parent.fatherDetails.dateOfBirth"
-                                placeholder="dateOfBirth"
-                              />
-                              <TextField
-                                type="number"
-                                name="parent.fatherDetails.mobileNo"
-                                placeholder="mobileNo"
-                              />
-                              <TextField
-                                name="parent.fatherDetails.emailAddress"
-                                placeholder="emailAddress"
-                              />
-
-                              <TextField
-                                type="number"
-                                name="parent.fatherDetails.aadarNo"
-                                placeholder="aadarNo"
-                              />
-                              <TextField
-                                name="parent.fatherDetails.educationQalification"
-                                placeholder="educationQalification"
-                              />
-                              <TextField
-                                name="parent.fatherDetails.occupation"
-                                placeholder="occupation"
-                              />
-                              <TextField
-                                type="number"
-                                name="parent.fatherDetails.annualIncome"
-                                placeholder="annualIncome"
-                              />
-                            </div>
+                          <div
+                            className=""
+                            style={{
+                              display: "flex",
+                              justifyContent: "end",
+                              gap: "20px",
+                            }}
+                          >
+                            <Button
+                              onClick={() => setFatherDetails((m) => !m)}
+                              variant="primary"
+                            >
+                              Father Details
+                            </Button>
+                            <Button
+                              onClick={() => setMotherDetails((m) => !m)}
+                              variant="primary"
+                            >
+                              Mother Details
+                            </Button>
                           </div>
-                          <div className="">
-                            <h3>Mother Details</h3>
-                            <div className="grid-two">
-                              <TextField
-                                name="parent.motherDetails.name"
-                                placeholder="name"
-                              />
-                              <TextField
-                                leftIcon={<Calender />}
-                                type="date"
-                                name="parent.motherDetails.dateOfBirth"
-                                placeholder="dateOfBirth"
-                              />
-                              <TextField
-                                type="number"
-                                name="parent.motherDetails.mobileNo"
-                                placeholder="mobileNo"
-                              />
-                              <TextField
-                                name="parent.motherDetails.emailAddress"
-                                placeholder="emailAddress"
-                              />
 
-                              <TextField
-                                type="number"
-                                name="parent.motherDetails.aadarNo"
-                                placeholder="aadarNo"
-                              />
-                              <TextField
-                                name="parent.motherDetails.educationQalification"
-                                placeholder="educationQalification"
-                              />
-                              <TextField
-                                name="parent.motherDetails.occupation"
-                                placeholder="occupation"
-                              />
-                              <TextField
-                                type="number"
-                                name="parent.motherDetails.annualIncome"
-                                placeholder="annualIncome"
-                              />
+                          {fatherDetails && (
+                            <div className="">
+                              <h3>Father Details</h3>
+                              <div className="grid-one">
+                                <TextField
+                                  name="parent.fatherDetails.name"
+                                  placeholder="Name"
+                                />
+
+                                <TextField
+                                  type="number"
+                                  name="parent.fatherDetails.aadarNo"
+                                  placeholder="Aadhar card no."
+                                />
+                                <TextField
+                                  leftIcon={<Calender />}
+                                  type={
+                                    clickFatherDateOfBirth ? "date" : "text"
+                                  }
+                                  name="parent.fatherDetails.dateOfBirth"
+                                  placeholder="Date of birth"
+                                  onClick={() =>
+                                    setClickFatherDateOfBirth(true)
+                                  }
+                                />
+
+                                <TextField
+                                  name="parent.fatherDetails.educationQalification"
+                                  placeholder="Educational qualification"
+                                />
+                                <TextField
+                                  type="number"
+                                  name="parent.fatherDetails.mobileNo"
+                                  placeholder="Mobile no."
+                                />
+
+                                <TextField
+                                  name="parent.fatherDetails.occupation"
+                                  placeholder="Occupation"
+                                />
+                                <TextField
+                                  name="parent.fatherDetails.emailAddress"
+                                  placeholder="E-mail Address"
+                                />
+                                <TextField
+                                  type="number"
+                                  name="parent.fatherDetails.annualIncome"
+                                  placeholder="Annual income"
+                                />
+                              </div>
                             </div>
-                          </div>
+                          )}
+                          {motherDetails && (
+                            <div className="">
+                              <h3>Mother Details</h3>
+                              <div className="grid-two">
+                                <TextField
+                                  name="parent.motherDetails.name"
+                                  placeholder="Name"
+                                />
+                                <TextField
+                                  type="number"
+                                  name="parent.motherDetails.aadarNo"
+                                  placeholder="Aadhar card no."
+                                />
+                                <TextField
+                                  leftIcon={<Calender />}
+                                  type={
+                                    clickMotherDateOfBirth ? "date" : "text"
+                                  }
+                                  name="parent.motherDetails.dateOfBirth"
+                                  placeholder="Date of birth"
+                                  onClick={() =>
+                                    setClickMotherDateOfBirth(true)
+                                  }
+                                />
+                                <TextField
+                                  name="parent.motherDetails.educationQalification"
+                                  placeholder="Educational qualification"
+                                />
+                                <TextField
+                                  type="number"
+                                  name="parent.motherDetails.mobileNo"
+                                  placeholder="Mobile no."
+                                />
+
+                                <TextField
+                                  name="parent.motherDetails.occupation"
+                                  placeholder="Occupation"
+                                />
+                                <TextField
+                                  name="parent.motherDetails.emailAddress"
+                                  placeholder="E-mail Address"
+                                />
+
+                                <TextField
+                                  type="number"
+                                  name="parent.motherDetails.annualIncome"
+                                  placeholder="Annual income"
+                                />
+                              </div>
+                            </div>
+                          )}
                         </div>
                       )}
                       {selectedHeader === "siblings" && (
                         <FieldArray name="siblings">
-                          {({ push, remove }) => (
-                            <div>
-                              {values.siblings.map((sibling, index) => {
-                                return (
-                                  <div className="grid" key={index}>
-                                    <h3>Sibling {index + 1}</h3>
+                          {({ push, remove }) =>
+                            values.siblings.length > 0 ? (
+                              <div>
+                                {values.siblings.map((sibling, index) => {
+                                  return (
+                                    <div className="grid" key={index}>
+                                      <h3>Sibling {index + 1}</h3>
 
-                                    <div className="grid-one">
-                                      <div className="">
+                                      <div className="grid-one">
+                                        <div className="">
+                                          <TextField
+                                            style={{ cursor: "pointer" }}
+                                            rightIcon={<DropDown />}
+                                            onClick={() =>
+                                              setOpenBrootherSister((m) => !m)
+                                            }
+                                            name={`siblings[${index}].sibling`}
+                                            placeholder="Sibling"
+                                          />
+                                          {openBrotherSister && (
+                                            <div className="options">
+                                              {brotherSister.map(
+                                                (option, i) => (
+                                                  <p
+                                                    key={i}
+                                                    onClick={() => {
+                                                      setFieldValue(
+                                                        `siblings[${index}].sibling`,
+                                                        option.label
+                                                      );
+                                                      setOpenBrootherSister(
+                                                        false
+                                                      );
+                                                    }}
+                                                  >
+                                                    {option.label}
+                                                  </p>
+                                                )
+                                              )}
+                                            </div>
+                                          )}
+                                        </div>
                                         <TextField
-                                          style={{ cursor: "pointer" }}
-                                          rightIcon={<DropDown />}
-                                          onClick={() =>
-                                            setOpenBrootherSister((m) => !m)
-                                          }
-                                          name={`siblings[${index}].sibling`}
-                                          placeholder="sibling"
+                                          name={`siblings[${index}].name`}
+                                          placeholder="Name"
                                         />
-                                        {openBrotherSister && (
-                                          <div className="options">
-                                            {brotherSister.map(
-                                              (option, index) => (
-                                                <p
-                                                  key={index}
-                                                  onClick={() => {
-                                                    setFieldValue(
-                                                      `siblings[${index}].sibling`,
-                                                      option.value
-                                                    );
-                                                    setOpenBrootherSister(
-                                                      false
-                                                    );
-                                                  }}
-                                                >
-                                                  {option.label}
-                                                </p>
-                                              )
-                                            )}
-                                          </div>
-                                        )}
+                                        <TextField
+                                          leftIcon={<Calender />}
+                                          type={
+                                            clickSiblingDateOfBirth
+                                              ? "date"
+                                              : "text"
+                                          }
+                                          name={`siblings[${index}].dateOfBirth`}
+                                          placeholder="Date of birth"
+                                          onClick={() =>
+                                            setClickSiblingDateOfBirth(true)
+                                          }
+                                        />
+                                        <TextField
+                                          name={`siblings[${index}].class`}
+                                          placeholder="Class"
+                                        />
+
+                                        <TextField
+                                          name={`siblings[${index}].academicYear`}
+                                          placeholder="Academic year"
+                                        />
+                                        <TextField
+                                          name={`siblings[${index}].instituteName`}
+                                          placeholder="Institute name"
+                                        />
+                                        <Button
+                                          variant="secondary"
+                                          type="button"
+                                          leftIcon={<Minus />}
+                                          onClick={() => remove(index)}
+                                        >
+                                          Remove
+                                        </Button>
+                                        <Button
+                                          variant="primary"
+                                          type="button"
+                                          onClick={() =>
+                                            push({
+                                              name: "",
+                                              class: "",
+                                              dateOfBirth: "",
+                                              instituteName: "",
+                                            })
+                                          }
+                                          leftIcon={<Plus />}
+                                        >
+                                          Add Sibling
+                                        </Button>
                                       </div>
-                                      <TextField
-                                        leftIcon={<Calender />}
-                                        type="date"
-                                        name={`siblings[${index}].dateOfBirth`}
-                                        placeholder="dateOfBirth"
-                                      />
-                                      <TextField
-                                        name={`siblings[${index}].class`}
-                                        placeholder="class"
-                                      />
-                                      <TextField
-                                        name={`siblings[${index}].name`}
-                                        placeholder="name"
-                                      />
-                                      <TextField
-                                        name={`siblings[${index}].academicYear`}
-                                        placeholder="academicYear"
-                                      />
-                                      <TextField
-                                        name={`siblings[${index}].instituteName`}
-                                        placeholder="instituteName"
-                                      />
-                                      <Button
-                                        variant="secondary"
-                                        type="button"
-                                        onClick={() => remove(index)}
-                                        disabled={values.siblings.length === 1}
-                                      >
-                                        Remove
-                                      </Button>
-                                      <Button
-                                        variant="primary"
-                                        type="button"
-                                        onClick={() =>
-                                          push({
-                                            name: "",
-                                            class: "",
-                                            dateOfBirth: "",
-                                            instituteName: "",
-                                          })
-                                        }
-                                      >
-                                        Add Sibling
-                                      </Button>
                                     </div>
-                                    {/* <div className="grid-two">
-              
-            </div> */}
-                                  </div>
-                                );
-                              })}
-                            </div>
-                          )}
+                                  );
+                                })}
+                              </div>
+                            ) : (
+                              <div
+                                className=""
+                                style={{
+                                  display: "flex",
+                                  justifyContent: "end",
+                                  paddingBottom: "24px",
+                                }}
+                              >
+                                <Button
+                                  variant="primary"
+                                  type="button"
+                                  onClick={() =>
+                                    push({
+                                      name: "",
+                                      class: "",
+                                      dateOfBirth: "",
+                                      instituteName: "",
+                                    })
+                                  }
+                                  leftIcon={<Plus />}
+                                >
+                                  Add Sibling
+                                </Button>
+                              </div>
+                            )
+                          }
                         </FieldArray>
-                        // <div className="grid">
-                        //   <div className="grid-one">
-                        //     <TextField
-                        //       name="siblings.name"
-                        //       placeholder="name"
-                        //     />
-                        //     <TextField
-                        //       name="siblings.class"
-                        //       placeholder="class"
-                        //     />
-                        //   </div>
-                        //   <div className="grid-two">
-                        //     <TextField
-                        //       name="siblings.dateOfBirth"
-                        //       placeholder="dateOfBirth"
-                        //     />
-                        //     <TextField
-                        //       name="siblings.instituteName"
-                        //       placeholder="instituteName"
-                        //     />
-                        //   </div>
-                        // </div>
                       )}
                       {selectedHeader === "previousStudy" && (
                         <div className="grid">
                           <div className="grid-one">
                             <TextField
                               name="previousStudy.instituteName"
-                              placeholder="instituteName"
+                              placeholder="Institute name"
                             />
                             <TextField
                               name="previousStudy.academicYear"
-                              placeholder="academicYear"
+                              placeholder="Academic year"
                             />
                             <div className="">
                               <TextField
@@ -899,7 +965,7 @@ const NewAdmission = () => {
                                 rightIcon={<DropDown />}
                                 onClick={() => setOpenMatric((m) => !m)}
                                 name="previousStudy.matric"
-                                placeholder="matric"
+                                placeholder="Matric"
                               />
                               {openMatric && (
                                 <div className="options">
@@ -909,7 +975,7 @@ const NewAdmission = () => {
                                       onClick={() => {
                                         setFieldValue(
                                           "previousStudy.matric",
-                                          option.value
+                                          option.label
                                         );
                                         setOpenMatric(false);
                                       }}
@@ -922,16 +988,16 @@ const NewAdmission = () => {
                             </div>
                             <TextField
                               name="previousStudy.class"
-                              placeholder="class"
+                              placeholder="Class"
                             />
                             <TextField
                               name="previousStudy.medium"
-                              placeholder="medium"
+                              placeholder="Medium"
                             />
 
                             <TextField
                               name="previousStudy.marks"
-                              placeholder="marks"
+                              placeholder="Marks"
                             />
                           </div>
                         </div>
@@ -947,7 +1013,7 @@ const NewAdmission = () => {
                                 rightIcon={<Upload />}
                                 value={undefined}
                                 name="upload.transferCertificate"
-                                placeholder="transferCertificate"
+                                placeholder="Transfer Certificate"
                                 onChange={(e) =>
                                   handleIcon(
                                     e,
@@ -966,7 +1032,7 @@ const NewAdmission = () => {
                                 rightIcon={<Upload />}
                                 value={undefined}
                                 name="upload.studentPhoto"
-                                placeholder="studentPhoto"
+                                placeholder="Student Photo"
                                 onChange={(e) =>
                                   handleIcon(
                                     e,
@@ -987,7 +1053,7 @@ const NewAdmission = () => {
                                 value={undefined}
                                 rightIcon={<Upload />}
                                 name="upload.birthCertificate"
-                                placeholder="birthCertificate"
+                                placeholder="Birth Certificate"
                                 onChange={(e) =>
                                   handleIcon(
                                     e,
@@ -1006,7 +1072,7 @@ const NewAdmission = () => {
                                 accept=".pdf"
                                 value={undefined}
                                 name="upload.tenthMarksheet"
-                                placeholder="tenthMarksheet"
+                                placeholder="Tenth Marksheet"
                                 onChange={(e) =>
                                   handleIcon(
                                     e,

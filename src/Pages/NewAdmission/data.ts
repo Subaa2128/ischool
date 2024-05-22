@@ -178,8 +178,8 @@ export const brotherSister = [
 ];
 
 export const matric = [
-  { value: "matric", label: "Matric" },
-  { value: "cbse", label: "CBSC" },
-  { value: "cse", label: "CSE" },
+  { value: "board", label: "Board" },
+  { value: "cbse", label: "CBSE" },
+  { value: "icse", label: "ICSE" },
   { value: "other", label: "Other" },
 ];

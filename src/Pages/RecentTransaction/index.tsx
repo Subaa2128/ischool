@@ -1,6 +1,8 @@
 import React, { useCallback, useEffect, useState } from "react";
 import "./RecentTransaction.scss";
 import { ReactComponent as LefTArrow } from "../../assets/Icons/arrow-left-circle.svg";
+import { ReactComponent as DownloadIcon } from "../../assets/Icons/download-white.svg";
+
 import Search from "../../Components/Search";
 
 import { collection, getDocs, query } from "firebase/firestore";
@@ -8,8 +10,18 @@ import { db } from "../../utils/firebase";
 import { INewAdmission } from "../../utils/types";
 import { useNavigate } from "react-router-dom";
 import moment from "moment";
+import Button from "../../Components/Button";
+import {
+  Document,
+  Page,
+  StyleSheet,
+  Text,
+  View,
+  pdf,
+} from "@react-pdf/renderer";
 
-const EntriesPerPage = 10;
+const EntriesPerPage = 5;
+let totalDatasRendered = 0;
 
 type FeeDetail = {
   reciptNo: string;
@@ -31,9 +43,13 @@ const RecentTransaction = () => {
   const [searchData, setSearchData] = useState("");
   const [selectFee, setSelectFee] = useState("");
   const [openFee, setOpenFee] = useState(false);
+  const [totalData, setotalData] = useState(0);
+  const [totalArray, setTotalArray] = useState([]);
+  console.log(totalArray);
 
   const onPageChange = (pageNumber: React.SetStateAction<number>) => {
     setCurrentPage(pageNumber);
+    totalDatasRendered = 0;
   };
 
   const renderPageNumbers = () => {
@@ -52,6 +68,23 @@ const RecentTransaction = () => {
     }
     return pages;
   };
+
+  const totalPages = Math.ceil(totalData / EntriesPerPage);
+
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const startIndex = (currentPage - 1) * EntriesPerPage;
+  const endIndex = currentPage * EntriesPerPage;
 
   function determineInputType(input: string): string {
     // Check if input is empty or just whitespace
@@ -175,6 +208,7 @@ const RecentTransaction = () => {
 
         const filteredFeeDetails = item.feeDetails.filter(
           (feeDetail: FeeDetail) => {
+            // if (selectFee.split("_", 1)[0] === "customfee")
             return feeDetail.name.toLowerCase() === selectFee.toLowerCase();
           }
         );
@@ -192,6 +226,7 @@ const RecentTransaction = () => {
           item.admission.grade.toLowerCase() === selectGrade.toLowerCase()
       );
     }
+
     console.log(tempData);
 
     setFilterData(tempData);
@@ -204,10 +239,6 @@ const RecentTransaction = () => {
     searchData,
   ]);
 
-  const startIndex = (currentPage - 1) * EntriesPerPage;
-  const endIndex = currentPage * EntriesPerPage;
-
-  console.log(filterData);
   const getData = useCallback(async () => {
     const q = query(collection(db, "NewAdmission"));
     const querySnapshot = await getDocs(q);
@@ -236,6 +267,86 @@ const RecentTransaction = () => {
     setSelectFee("");
     setSearchData("");
   };
+
+  const downloadStatement = async () => {
+    try {
+      const pdfBlob = await pdf(
+        <Document>
+          <Page style={styles.page} size="A4">
+            <View style={styles.content}>
+              <Text style={styles.heading}>RECEIPT NO.</Text>
+              <Text style={styles.heading}>PAID DATE</Text>
+              <Text style={styles.heading}>NAME</Text>
+              <Text style={styles.heading}>ADMISSION NO.</Text>
+              <Text style={styles.heading}>SESSION</Text>
+              <Text style={styles.heading}>AMOUNT</Text>
+            </View>
+            {filterData.length > 0
+              ? filterData.map((f, i) =>
+                  f.feeDetails
+                    .filter((d) => d.state === true)
+                    .map((s, index) => (
+                      <>
+                        <View key={index} style={styles.content}>
+                          <Text style={styles.text}>{s.reciptNo}</Text>
+                          <Text style={styles.text}>
+                            {moment(s.updatedDate).format("MMM DD, YYYY")}
+                          </Text>
+                          <Text style={styles.text}>
+                            {f.student.nameInEnglish}
+                          </Text>
+                          <Text style={styles.text}>
+                            {f.admission.admissionNo}
+                          </Text>
+                          <Text style={styles.text}>{s.name}</Text>
+                          <Text style={styles.text}>{s.amount}</Text>
+                        </View>
+                        <Text style={styles.border}></Text>
+                      </>
+                    ))
+                )
+              : data.map((f, i) =>
+                  f.feeDetails
+                    .filter((d) => d.state === true)
+                    .map((s, index) => (
+                      <>
+                        <View key={index} style={styles.content}>
+                          <Text style={styles.text}>{s.reciptNo}</Text>
+                          <Text style={styles.text}>
+                            {moment(s.updatedDate).format("MMM DD, YYYY")}
+                          </Text>
+                          <Text style={styles.text}>
+                            {f.student.nameInEnglish}
+                          </Text>
+                          <Text style={styles.text}>
+                            {f.admission.admissionNo}
+                          </Text>
+                          <Text style={styles.text}>{s.name}</Text>
+                          <Text style={styles.text}>{s.amount}</Text>
+                        </View>
+                        <Text style={styles.border}></Text>
+                      </>
+                    ))
+                )}
+          </Page>
+        </Document>
+      ).toBlob();
+      window.open(URL.createObjectURL(pdfBlob));
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  let newArray: any = [];
+  let length = 0;
+
+  useEffect(() => {
+    data.forEach((f) => f.feeDetails.forEach((f2) => newArray.push(f2)));
+    console.log(newArray);
+    length = newArray.length;
+    console.log("newArray", length);
+    setotalData(newArray.length);
+    setTotalArray(newArray);
+  }, [data, totalData, data]);
 
   return (
     <div className="recent-transaction-container">
@@ -283,9 +394,10 @@ const RecentTransaction = () => {
 
               <tbody>
                 {filterData.length !== 0
-                  ? filterData.slice(startIndex, endIndex).map((f, i) =>
+                  ? filterData.map((f, i) =>
                       f.feeDetails
                         .filter((d) => d.state === true)
+                        .slice(startIndex, endIndex)
                         .map((s, index) => (
                           <tr key={i && index + 1}>
                             <td>{s.reciptNo}</td>
@@ -311,34 +423,42 @@ const RecentTransaction = () => {
                           </tr>
                         ))
                     )
-                  : data.slice(startIndex, endIndex).map((f, i) =>
-                      f.feeDetails
+                  : data.map((f, i) => {
+                      return f.feeDetails
                         .filter((d) => d.state === true)
-                        .map((s, index) => (
-                          <tr key={i && index + 1}>
-                            <td>{s.reciptNo}</td>
-                            <td>
-                              {moment(s.updatedDate).format("MMM DD, YYYY")}
-                            </td>
-                            <td>{f.student.nameInEnglish}</td>
-                            <td>{f.admission.admissionNo}</td>
-                            <td>{s.name}</td>
-                            <td>{s.amount} INR</td>
-                            <td
-                              style={{
-                                textDecoration: "underline",
-                                cursor: "pointer",
-                                color: "#455A64",
-                              }}
-                              onClick={() =>
-                                navigate(`/paymenthistory/${f.id}`)
-                              }
-                            >
-                              View
-                            </td>
-                          </tr>
-                        ))
-                    )}
+                        .map((s, index) => {
+                          console.log(totalDatasRendered);
+                          if (
+                            totalDatasRendered > startIndex &&
+                            totalDatasRendered < endIndex
+                          )
+                            return (
+                              <tr key={i && index + 1}>
+                                <td>{s.reciptNo}</td>
+                                <td>
+                                  {moment(s.updatedDate).format("MMM DD, YYYY")}
+                                </td>
+                                <td>{f.student.nameInEnglish}</td>
+                                <td>{f.admission.admissionNo}</td>
+                                <td>{s.name}</td>
+                                <td>{s.amount} INR</td>
+                                <td
+                                  style={{
+                                    textDecoration: "underline",
+                                    cursor: "pointer",
+                                    color: "#455A64",
+                                  }}
+                                  onClick={() =>
+                                    navigate(`/paymenthistory/${f.id}`)
+                                  }
+                                >
+                                  View
+                                </td>
+                              </tr>
+                            );
+                          totalDatasRendered++;
+                        });
+                    })}
               </tbody>
             </table>
           </div>
@@ -347,7 +467,6 @@ const RecentTransaction = () => {
               <p
                 style={{
                   color: "#455a64",
-                  fontFamily: "Gilroy",
                   fontSize: "14px",
                 }}
               >
@@ -355,28 +474,29 @@ const RecentTransaction = () => {
               </p>
               <ul className="pagination">
                 <li
-                  onClick={() => onPageChange(currentPage - 1)}
                   className={currentPage === 1 ? "disabled" : ""}
+                  onClick={handlePrevPage}
                 >
                   Prev
                 </li>
                 {renderPageNumbers()}
                 <li
-                  onClick={() => onPageChange(currentPage + 1)}
-                  className={currentPage === 10 ? "disabled" : ""}
+                  className={currentPage === totalPages ? "disabled" : ""}
+                  onClick={handleNextPage}
                 >
                   Next
                 </li>
               </ul>
             </div>
-            {/* <div className="download">
+            <div className="download">
               <Button
                 variant="primary"
-                leftIcon={<img src={DownloadIcon} alt="" />}
+                leftIcon={<DownloadIcon />}
+                onClick={() => downloadStatement()}
               >
                 Download statement
               </Button>
-            </div> */}
+            </div>
           </div>
         </div>
       </div>
@@ -385,3 +505,39 @@ const RecentTransaction = () => {
 };
 
 export default RecentTransaction;
+
+const styles = StyleSheet.create({
+  page: {
+    padding: "10px 30px",
+    // display: "flex",
+    // alignItems: "center",
+    // justifyContent: "center",
+    // flexDirection: "column",
+    gap: "32px",
+    // marginTop: "-70px",
+  },
+  heading: {
+    color: "#252525",
+    fontSize: "10px",
+    width: "45%",
+    fontWeight: 900,
+    textAlign: "center",
+  },
+  text: {
+    color: "#252525",
+    textAlign: "center",
+    fontSize: "12px",
+    textTransform: "capitalize",
+    width: "45%",
+  },
+  border: {
+    margin: "-20px 0",
+    borderTop: "1px solid #c7dce6",
+  },
+  content: {
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "stretch",
+  },
+});
