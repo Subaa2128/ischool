@@ -28,7 +28,7 @@ const PaymentHistory = () => {
   const [openRecipt, setOpenRecipt] = useState(false);
   const [selectedFees, setSelectedFees] = useState<number[]>();
   const [totalFees, setTotalFees] = useState<number>();
-  const [receiptNumber, setReceiptNumber] = useState<number>();
+  const [receiptNumber, setReceiptNumber] = useState<string>();
   const [feeName, setFeeName] = useState("");
   const [feeAmount, setFeeAmount] = useState("");
   const [feeValue, setFeeValue] = useState(false);
@@ -70,70 +70,80 @@ const PaymentHistory = () => {
 
             <View style={styles.heading}>
               <Text style={styles.text}>
-                No. 58, 18th Cross Street Kaikalan Chavadi, Tambaram Sanatorium,
+                No. 58, 18th Cross Street Kaikalan Chavadi,
               </Text>
             </View>
             <View style={styles.heading}>
-              <Text style={styles.text}> Chennai - 600 047.</Text>
+              <Text style={styles.text}>
+                Tambaram Sanatorium, Chennai - 600 047.
+              </Text>
             </View>
-            <View style={styles.feeRecipt}>
-              <Text style={styles.heading2}>Fee Receipt</Text>
-            </View>
-            <View style={styles.border}></View>
-            <View style={styles.reciptDetails}>
-              <View style={styles.reciptDetail}>
-                <Text style={styles.text}>Receipt No</Text>
-                <Text style={styles.heading}>{feeDetail?.reciptNo}</Text>
-              </View>
-              <View style={styles.reciptDetail}>
-                <Text style={styles.text}>Admission No</Text>
-                <Text style={styles.heading}>
-                  {data?.admission.admissionNo}
-                </Text>
-              </View>
 
-              <View style={styles.reciptDetail}>
-                <Text style={styles.text}>Date</Text>
-                <Text style={styles.heading}>
+            <View
+              style={{
+                display: "flex",
+                flexDirection: "row",
+                justifyContent: "space-between",
+                alignItems: "flex-start",
+                paddingTop: "30px",
+              }}
+            >
+              <View>
+                <View style={styles.reciptDetails}>
+                  <View style={styles.reciptDetail}>
+                    <Text style={styles.text}>Receipt No :</Text>
+                    <Text style={styles.heading}>{feeDetail?.reciptNo}</Text>
+                  </View>
+                  <View style={styles.reciptDetail}>
+                    <Text style={styles.text}>Admission No :</Text>
+                    <Text style={styles.heading}>
+                      {data?.admission.admissionNo}
+                    </Text>
+                  </View>
+                </View>
+                <View style={styles.reciptDetails}>
+                  <View style={styles.reciptDetail}>
+                    <Text style={styles.text}>Name :</Text>
+                    <Text style={[styles.heading, { textAlign: "left" }]}>
+                      {data?.student.nameInEnglish}
+                    </Text>
+                  </View>
+                  <View style={styles.reciptDetail}>
+                    <Text style={styles.text}>Grade :</Text>
+                    <Text style={styles.heading}>{data?.admission.grade}</Text>
+                  </View>
+                  <View style={styles.reciptDetail}>
+                    <Text style={styles.text}>Academic year :</Text>
+                    <Text style={styles.heading}>
+                      {data?.admission.academicYear}
+                    </Text>
+                  </View>
+                </View>
+              </View>
+              <View style={styles.feeRecipt}>
+                <Text style={styles.heading2}>Fee Receipt</Text>
+                <Text style={styles.heading2}>
                   {moment().format("MM-DD-YYYY")}
                 </Text>
               </View>
             </View>
-            <View style={styles.reciptDetails}>
-              <View style={styles.reciptDetail}>
-                <Text style={styles.text}>Name</Text>
-                <Text style={styles.heading}>
-                  {data?.student.nameInEnglish}
-                </Text>
-              </View>
-              <View style={styles.reciptDetail}>
-                <Text style={styles.text}>Grade</Text>
-                <Text style={styles.heading}>{data?.admission.grade}</Text>
-              </View>
-              <View style={styles.reciptDetail}>
-                <Text style={styles.text}>Academic year</Text>
-                <Text style={styles.heading}>
-                  {data?.admission.academicYear}
-                </Text>
-              </View>
-            </View>
 
-            <View style={styles.border}></View>
+            {/* <View style={styles.border}></View> */}
             <View>
               <View style={styles.detail}>
-                <Text style={styles.text}>{feeDetail?.name}</Text>
+                <Text style={styles.text}>{feeDetail?.name} :</Text>
                 <Text style={styles.heading}>{feeDetail?.amount}.00</Text>
               </View>
-              <View style={styles.border}></View>
-              <View>
+              {/* <View style={styles.border}></View> */}
+              <View style={{ paddingTop: "10px" }}>
                 <View style={styles.detail}>
-                  <Text style={styles.text}>Total</Text>
+                  <Text style={styles.text}>Total :</Text>
                   <Text style={styles.heading}>{feeDetail?.amount}.00</Text>
                 </View>
               </View>
-              <View style={styles.border}></View>
+              {/* <View style={styles.border}></View> */}
             </View>
-            <View style={styles.heading}>
+            <View style={[styles.heading, { paddingTop: "20px" }]}>
               <Text style={styles.text}>In words {number} only.</Text>
             </View>
             <View style={styles.signature}>
@@ -209,7 +219,7 @@ const PaymentHistory = () => {
                                 {f.name}
                               </td>
                               <td>
-                                {moment(f.updatedDate).format("MMM DD,S YYYY")}
+                                {moment(f.updatedDate).format("MMM DD, YYYY")}
                               </td>
                               <td>{Number(f.amount).toLocaleString()}</td>
 
@@ -242,15 +252,16 @@ const styles = StyleSheet.create({
   page: {
     padding: "10px 50px",
     display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: "stretch",
+    justifyContent: "flex-start",
     flexDirection: "column",
     gap: "32px",
-    marginTop: "-70px",
+
+    // marginTop: "-70px",
   },
   heading: {
     color: "#252525",
-    fontSize: "20px",
+    fontSize: "13px",
     textAlign: "center",
     display: "flex",
     alignItems: "center",
@@ -260,6 +271,8 @@ const styles = StyleSheet.create({
     color: "#252525",
     textAlign: "center",
     fontSize: "14px",
+    textTransform: "capitalize",
+    paddingBottom: "3px",
   },
   border: {
     margin: "24px 0",
@@ -267,24 +280,23 @@ const styles = StyleSheet.create({
   },
   reciptDetail: {
     display: "flex",
-    flexDirection: "column",
-    alignItems: "flex-start",
-    width: "100px",
+    flexDirection: "row",
+    alignItems: "center",
     marginTop: "10px",
+    gap: "10px",
   },
   reciptDetails: {
     display: "flex",
-    flexDirection: "row",
-    flexWrap: "wrap",
-    columnGap: "40px",
-    rowGap: "16px",
-    justifyContent: "space-between",
+    flexDirection: "column",
   },
 
   reciptContent: {
-    border: "1px solid #c7dce6",
+    border: "5px solid black",
     padding: "40px",
     textAlign: "center",
+    height: "60vh",
+    // width: "6in",
+    // height: "6in",
   },
 
   feeRecipt: {
@@ -293,19 +305,21 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   heading2: {
-    border: "1px solid #c7dce6",
-    padding: "8px 24px",
-    marginTop: "24px",
+    fontSize: "14px",
+    // border: "1px solid #c7dce6",
+    // padding: "8px 24px",
+    // marginTop: "24px",
   },
   detail: {
     display: "flex",
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
-    gap: "8px",
+    justifyContent: "flex-start",
+    gap: "10px",
+    paddingTop: "10px",
   },
   signature: {
-    marginTop: "60px",
+    marginTop: "50px",
     display: "flex",
     alignItems: "flex-end",
     justifyContent: "center",

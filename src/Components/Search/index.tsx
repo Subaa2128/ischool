@@ -5,6 +5,7 @@ import Button from "../Button";
 import { ReactComponent as SearchIcon } from "../../assets/Icons/search.svg";
 import { ReactComponent as FilterIcon } from "../../assets/Icons/Frame 84.svg";
 import { ReactComponent as Dropdown } from "../../assets/Icons/chevron-down.svg";
+import { ReactComponent as Calender } from "../../assets/Icons/calendar.svg";
 
 import { gradeOptions } from "../../Pages/NewAdmission/data";
 
@@ -52,6 +53,8 @@ const Search: React.FC<ISearch> = ({
   searchDateOfAdmission,
 }) => {
   const [openFilter, setOpenFilter] = useState(false);
+  const [openFrom, setOpenFrom] = useState(false);
+  const [openTo, setOpenTo] = useState(false);
 
   return (
     <div className={`search-container ${openFilter ? "open-filter" : ""}`}>
@@ -66,17 +69,26 @@ const Search: React.FC<ISearch> = ({
       </div>
       {openFilter && (
         <div className="filter-options">
-          <input
-            type="date"
-            placeholder="From"
-            onChange={(e) => setSearchDateOfSubmision(e.target.value)}
-          />
-
-          <input
-            type="date"
-            placeholder="To"
-            onChange={(e) => setSearchDateToSubmision(e.target.value)}
-          />
+          <div className="calender">
+            <Calender />
+            <div className="border"></div>
+            <input
+              type={openFrom ? "date" : "text"}
+              placeholder="From"
+              onChange={(e) => setSearchDateOfSubmision(e.target.value)}
+              onClick={() => setOpenFrom(true)}
+            />
+          </div>
+          <div className="calender">
+            <Calender />
+            <div className="border"></div>
+            <input
+              type={openTo ? "date" : "text"}
+              placeholder="To"
+              onChange={(e) => setSearchDateToSubmision(e.target.value)}
+              onClick={() => setOpenTo(true)}
+            />
+          </div>
 
           <div className="drop-down">
             <div className="value" onClick={() => setOpenGrade((m) => !m)}>
@@ -127,7 +139,7 @@ const Search: React.FC<ISearch> = ({
       )}
       {openFilter && (
         <Button variant="primary" onClick={() => [handleSearchFilter()]}>
-          Reset
+          Apply
         </Button>
       )}
     </div>

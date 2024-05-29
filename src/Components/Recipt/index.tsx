@@ -21,7 +21,7 @@ import {
 interface IRecipt {
   id?: string;
   selectedFees: number[];
-  receiptNumber: number | undefined;
+  receiptNumber: string | undefined;
   totalFees: number | undefined;
   feeName?: string;
   feeAmount?: string;
@@ -96,56 +96,63 @@ const Recipt: React.FC<IRecipt> = ({
             <View style={styles.heading}>
               <Text style={styles.text}> Chennai - 600 047.</Text>
             </View>
-            <View style={styles.feeRecipt}>
-              <Text style={styles.heading2}>Fee Receipt</Text>
-            </View>
-            <View style={styles.border}></View>
-            <View style={styles.reciptDetails}>
-              <View style={styles.reciptDetail}>
-                <Text style={styles.text}>Receipt No</Text>
-                <Text style={styles.heading}>{receiptNumber}</Text>
+            <View
+              style={{
+                display: "flex",
+                flexDirection: "row",
+                justifyContent: "space-between",
+                alignItems: "flex-start",
+                paddingTop: "30px",
+              }}
+            >
+              <View>
+                <View style={styles.reciptDetails}>
+                  <View style={styles.reciptDetail}>
+                    <Text style={styles.text}>Receipt No :</Text>
+                    <Text style={styles.heading}>{receiptNumber}</Text>
+                  </View>
+                  <View style={styles.reciptDetail}>
+                    <Text style={styles.text}>Admission No :</Text>
+                    <Text style={styles.heading}>
+                      {data?.admission.admissionNo}
+                    </Text>
+                  </View>
+                </View>
+                <View style={styles.reciptDetails}>
+                  <View style={styles.reciptDetail}>
+                    <Text style={styles.text}>Name :</Text>
+                    <Text style={[styles.heading, { textAlign: "left" }]}>
+                      {data?.student.nameInEnglish}
+                    </Text>
+                  </View>
+                  <View style={styles.reciptDetail}>
+                    <Text style={styles.text}>Grade :</Text>
+                    <Text style={styles.heading}>{data?.admission.grade}</Text>
+                  </View>
+                  <View style={styles.reciptDetail}>
+                    <Text style={styles.text}>Academic year :</Text>
+                    <Text style={styles.heading}>
+                      {data?.admission.academicYear}
+                    </Text>
+                  </View>
+                </View>
               </View>
-              <View style={styles.reciptDetail}>
-                <Text style={styles.text}>Admission No</Text>
-                <Text style={styles.heading}>
-                  {data?.admission.admissionNo}
-                </Text>
-              </View>
-
-              <View style={styles.reciptDetail}>
-                <Text style={styles.text}>Date</Text>
-                <Text style={styles.heading}>
+              <View style={styles.feeRecipt}>
+                <Text style={styles.heading2}>Fee Receipt</Text>
+                <Text style={styles.heading2}>
                   {moment().format("MM-DD-YYYY")}
                 </Text>
               </View>
             </View>
-            <View style={styles.reciptDetails}>
-              <View style={styles.reciptDetail}>
-                <Text style={styles.text}>Name</Text>
-                <Text style={styles.heading}>
-                  {data?.student.nameInEnglish}
-                </Text>
-              </View>
-              <View style={styles.reciptDetail}>
-                <Text style={styles.text}>Grade</Text>
-                <Text style={styles.heading}>{data?.admission.grade}</Text>
-              </View>
-              <View style={styles.reciptDetail}>
-                <Text style={styles.text}>Academic year</Text>
-                <Text style={styles.heading}>
-                  {data?.admission.academicYear}
-                </Text>
-              </View>
-            </View>
 
-            <View style={styles.border}></View>
+            {/* <View style={styles.border}></View> */}
             <View>
               {selectedFees &&
                 data?.feeDetails.map(
                   (f, i) =>
                     selectedFees.includes(i) && (
                       <View style={styles.detail}>
-                        <Text style={styles.text}>{f?.name}</Text>
+                        <Text style={styles.text}>{f?.name} :</Text>
                         <Text style={styles.heading}>{f?.amount}.00</Text>
                       </View>
                     )
@@ -153,25 +160,27 @@ const Recipt: React.FC<IRecipt> = ({
 
               {feeValue && (
                 <View style={styles.detail}>
-                  <Text style={styles.text}>{feeName}</Text>
+                  <Text style={styles.text}>{feeName} :</Text>
                   <Text style={styles.heading}>{feeAmount}.00</Text>
                 </View>
               )}
-              <View style={styles.border}></View>
-              <View>
+              {/* <View style={styles.border}></View> */}
+              <View style={{ paddingTop: "30px" }}>
                 <View style={styles.detail}>
-                  <Text style={styles.text}>Total</Text>
+                  <Text style={styles.text}>Total :</Text>
                   <Text style={styles.heading}>
-                    {selectedFees
-                      ? totalFees?.toLocaleString()
-                      : feeAmount?.toLowerCase()}
+                    {selectedFees && feeAmount
+                      ? Number(totalFees) + Number(feeAmount)
+                      : null}
+                    {selectedFees && !feeAmount ? totalFees : null}
+                    {feeAmount && !selectedFees ? feeAmount : null}
                     .00
                   </Text>
                 </View>
               </View>
-              <View style={styles.border}></View>
+              {/* <View style={styles.border}></View> */}
             </View>
-            <View style={styles.heading}>
+            <View style={[styles.heading, { paddingTop: "20px" }]}>
               <Text style={styles.text}>In words {words} only.</Text>
             </View>
             <View style={styles.signature}>
@@ -183,6 +192,7 @@ const Recipt: React.FC<IRecipt> = ({
     ).toBlob();
     window.open(URL.createObjectURL(pdfBlob));
   };
+  console.log(selectedFees);
 
   return (
     <div className="recipt-container">
@@ -194,65 +204,76 @@ const Recipt: React.FC<IRecipt> = ({
               No. 58, 18th Cross Street Kaikalan Chavadi, Tambaram Sanatorium,
             </p>
             <p> Chennai - 600 047.</p>
-            <div className="fee-recipt">
-              <h2>Fee Receipt</h2>
-            </div>
-            <div className="border"></div>
-            <div className="recipt-details">
-              <div className="recipt-detail">
-                <p>Receipt No</p>
-                <h3>{receiptNumber}</h3>
-              </div>
-              <div className="recipt-detail">
-                <p>Admission No</p>
-                <h3>{data?.admission.admissionNo}</h3>
-              </div>
+            <div
+              className=""
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "flex-start",
+                gap: "50px",
+                marginTop: "50px",
+              }}
+            >
+              <div className="recipt-details">
+                <div className="recipt-detail">
+                  <p>Receipt No :</p>
+                  <h3>{receiptNumber}</h3>
+                </div>
+                <div className="recipt-detail">
+                  <p>Admission No :</p>
+                  <h3>{data?.admission.admissionNo}</h3>
+                </div>
 
-              <div className="recipt-detail">
-                <p>Date</p>
-                <h3>{moment().format("MM-DD-YYYY")}</h3>
+                <div className="recipt-detail">
+                  <p>Name :</p>
+                  <h3 style={{ textTransform: "capitalize" }}>
+                    {data?.student.nameInEnglish}
+                  </h3>
+                </div>
+                <div className="recipt-detail">
+                  <p>Grade :</p>
+                  <h3>{data?.admission.grade}</h3>
+                </div>
+                <div className="recipt-detail">
+                  <p>Academic year :</p>
+                  <h3>{data?.admission.academicYear}</h3>
+                </div>
               </div>
-              <div className="recipt-detail">
-                <p>Name</p>
-                <h3 style={{ textTransform: "capitalize" }}>
-                  {data?.student.nameInEnglish}
-                </h3>
-              </div>
-              <div className="recipt-detail">
-                <p>Grade</p>
-                <h3>{data?.admission.grade}</h3>
-              </div>
-              <div className="recipt-detail">
-                <p>Academic year</p>
-                <h3>{data?.admission.academicYear}</h3>
+              <div className="fee-recipt">
+                <h2>Fees Receipt</h2>
+                <h2> {moment().format("MM-DD-YYYY")}</h2>
               </div>
             </div>
-            <div className="border"></div>
+            {/* <div className="border"></div> */}
             <div className="admision-details">
               {selectedFees &&
                 data?.feeDetails.map(
                   (f, i) =>
                     selectedFees.includes(i) && (
                       <div className="detail" key={i}>
-                        <p style={{ textTransform: "capitalize" }}>{f.name}</p>
+                        <p style={{ textTransform: "capitalize" }}>
+                          {f.name} :
+                        </p>
                         <h3>{Number(f.amount).toLocaleString()}.00</h3>
                       </div>
                     )
                 )}
               {feeValue && (
                 <div className="detail">
-                  <p style={{ textTransform: "capitalize" }}>{feeName}</p>
+                  <p style={{ textTransform: "capitalize" }}>{feeName} :</p>
                   <h3>{Number(feeAmount).toLocaleString()}.00</h3>
                 </div>
               )}
-              <div className="border" style={{ marginTop: "24px" }}></div>
-              <div className="admission-setails">
-                <div className="detail">
-                  <p>Total</p>
+              {/* <div className="border" style={{ marginTop: "24px" }}></div> */}
+              <div className="admission-details">
+                <div className="detail" style={{ paddingTop: "30px" }}>
+                  <p>Total :</p>
                   <h3>
-                    {selectedFees
-                      ? totalFees?.toLocaleString()
-                      : feeAmount?.toLowerCase()}
+                    {selectedFees && feeAmount
+                      ? Number(totalFees) + Number(feeAmount)
+                      : null}
+                    {selectedFees && !feeAmount ? totalFees : null}
+                    {feeAmount && !selectedFees ? feeAmount : null}
                     .00
                   </h3>
                 </div>
@@ -268,43 +289,6 @@ const Recipt: React.FC<IRecipt> = ({
             </div>
           </div>
           <div className="button">
-            {/* {data && (
-              <PDFDownloadLink
-                document={
-                  <Pdf
-                    admissionNo={data?.admission.admissionNo as string}
-                    nameInEnglish={data?.student.nameInEnglish as string}
-                    grade={data?.admission.grade as string}
-                    academicYear={data?.admission.academicYear as string}
-                    feeDetails={data?.feeDetails as any}
-                    totalFee={totalFee?.toString() as string}
-                    words={words as string}
-                  />
-                }
-                fileName="recipt"
-              >
-                {({ blob, url, loading, error }) =>
-                  loading ? (
-                    <Button
-                      variant="primary"
-                      // onClick={() => downloadDocument()}
-                      leftIcon={<Download />}
-                    >
-                      ....Download Recipt
-                    </Button>
-                  ) : (
-                    <Button
-                      variant="primary"
-                      // onClick={() => downloadDocument()}
-                      leftIcon={<Download />}
-                    >
-                      Download Recipt
-                    </Button>
-                  )
-                }
-              </PDFDownloadLink>
-            )} */}
-
             <Button
               variant="primary"
               onClick={() => downloadDocument()}
@@ -338,15 +322,15 @@ const styles = StyleSheet.create({
   page: {
     padding: "10px 50px",
     display: "flex",
-    alignItems: "center",
+    alignItems: "stretch",
     justifyContent: "center",
     flexDirection: "column",
     gap: "32px",
-    marginTop: "-70px",
+    // marginTop: "-70px",
   },
   heading: {
     color: "#252525",
-    fontSize: "16px",
+    fontSize: "13px",
     textAlign: "center",
     display: "flex",
     alignItems: "center",
@@ -357,6 +341,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontSize: "14px",
     textTransform: "capitalize",
+    paddingBottom: "3px",
   },
   border: {
     margin: "24px 0",
@@ -364,18 +349,14 @@ const styles = StyleSheet.create({
   },
   reciptDetail: {
     display: "flex",
-    flexDirection: "column",
-    alignItems: "flex-start",
-    width: "100px",
+    flexDirection: "row",
+    alignItems: "center",
     marginTop: "10px",
+    gap: "10px",
   },
   reciptDetails: {
     display: "flex",
-    flexDirection: "row",
-    flexWrap: "wrap",
-    columnGap: "40px",
-    rowGap: "16px",
-    justifyContent: "space-between",
+    flexDirection: "column",
   },
 
   reciptContent: {
@@ -390,19 +371,21 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   heading2: {
-    border: "1px solid #c7dce6",
-    padding: "8px 24px",
-    marginTop: "24px",
+    fontSize: "14px",
+    // border: "1px solid #c7dce6",
+    // padding: "8px 24px",
+    // marginTop: "24px",
   },
   detail: {
     display: "flex",
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
-    gap: "8px",
+    justifyContent: "flex-start",
+    gap: "10px",
+    paddingTop: "10px",
   },
   signature: {
-    marginTop: "60px",
+    marginTop: "150px",
     display: "flex",
     alignItems: "flex-end",
     justifyContent: "center",

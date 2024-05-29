@@ -3,7 +3,14 @@ import "./PaymentDetails.scss";
 import Button from "../Button";
 import { useNavigate } from "react-router-dom";
 import { INewAdmission } from "../../utils/types";
-import { collection, doc, getDocs, query, updateDoc } from "firebase/firestore";
+import {
+  addDoc,
+  collection,
+  doc,
+  getDocs,
+  query,
+  updateDoc,
+} from "firebase/firestore";
 import { db } from "../../utils/firebase";
 import moment from "moment";
 
@@ -12,7 +19,7 @@ interface IPaymentDetails {
   setOpenHistory: React.Dispatch<React.SetStateAction<boolean>>;
   setSelectedFees: React.Dispatch<React.SetStateAction<number[] | undefined>>;
   setTotalFees: React.Dispatch<React.SetStateAction<number | undefined>>;
-  setReceiptNumber: React.Dispatch<React.SetStateAction<number | undefined>>;
+  setReceiptNumber: React.Dispatch<React.SetStateAction<string | undefined>>;
   setFeeName: React.Dispatch<React.SetStateAction<string>>;
   setFeeAmount: React.Dispatch<React.SetStateAction<string>>;
   setFeeValue: React.Dispatch<React.SetStateAction<boolean>>;
@@ -39,7 +46,7 @@ const PaymentDetails: React.FC<IPaymentDetails> = ({
   const [data, setData] = useState<INewAdmission>();
   const [totalFee, setTotalFee] = useState<number>();
   const [admissionfeeState, setAdmissionFeeState] = useState<any[]>([]);
-
+  const [rteStudent, setRteStudent] = useState(false);
   const calculateFee = (array: number[]) => {
     if (array.length === 0) {
       setTotalFee(0);
@@ -48,14 +55,27 @@ const PaymentDetails: React.FC<IPaymentDetails> = ({
     let tempFee = 0;
     console.log(array);
 
-    // const number = array.forEach((f) => {
-    //   console.log("Loop", f);
-    //   tempFee += Number(data?.feeDetails[f].amount);
-    // });
+    const number = array.forEach((f) => {
+      console.log("Loop", f);
+      tempFee += Number(data?.feeDetails[f].amount);
+    });
 
     setTotalFee(tempFee);
     setSelectedFees(array);
     setTotalFees(tempFee);
+  };
+
+  const updateRte = async (status: boolean) => {
+    try {
+      if (!id) return;
+      console.log(status);
+      const userDocRef = doc(db, "NewAdmission", id);
+      await updateDoc(userDocRef, {
+        rteStudent: status,
+      });
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const getData = useCallback(async () => {
@@ -67,7 +87,7 @@ const PaymentDetails: React.FC<IPaymentDetails> = ({
     }));
     const filteredData = fetchedData.find((f) => f.id === id);
     setData(filteredData);
-  }, [id]);
+  }, []);
 
   useEffect(() => {
     getData();
@@ -80,8 +100,22 @@ const PaymentDetails: React.FC<IPaymentDetails> = ({
       const min = 10000;
       const max = 99999;
       let feeDetails: any[] = [];
-      const receiptNumber = Math.floor(Math.random() * (max - min + 1)) + min;
-      setReceiptNumber(receiptNumber);
+
+      const q = query(collection(db, "School"));
+      const querySnapshot = await getDocs(q);
+      const fetchedData = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...(doc.data() as Omit<{ totalReceipts: number }, "id">),
+      }));
+      console.log(fetchedData);
+      const rn = fetchedData[0].totalReceipts;
+      console.log(rn);
+      const receiptNumber = `IS${rn.toString().padStart(5, "0")}`;
+      console.log(receiptNumber);
+      const receiptDocRef = doc(db, "School", "VpSnwEY57ynwkVPEuQaA");
+      await updateDoc(receiptDocRef, {
+        totalReceipts: rn + 1,
+      });
       data?.feeDetails.map((it, i) => {
         if (admissionfeeState.includes(i)) {
           feeDetails.push({
@@ -110,6 +144,7 @@ const PaymentDetails: React.FC<IPaymentDetails> = ({
       await updateDoc(userDocRef, {
         feeDetails: feeDetails,
       });
+      setReceiptNumber(receiptNumber);
     } catch (error) {
       console.log(error);
     }
@@ -130,7 +165,14 @@ const PaymentDetails: React.FC<IPaymentDetails> = ({
           <div className="rte">
             <h5>RTE Student</h5>
             <label className="switch">
-              <input type="checkbox" />
+              <input
+                type="checkbox"
+                checked={data?.rteStudent ? data.rteStudent : rteStudent}
+                onChange={(e) => [
+                  setRteStudent(e.target.checked),
+                  updateRte(e.target.checked),
+                ]}
+              />
               <span className="slider round"></span>
             </label>
           </div>
@@ -216,7 +258,7 @@ const PaymentDetails: React.FC<IPaymentDetails> = ({
                 </td>
                 <td className="row">
                   <input
-                    type="text"
+                    type="number"
                     placeholder="Enter amount"
                     name=""
                     id=""
@@ -238,7 +280,16 @@ const PaymentDetails: React.FC<IPaymentDetails> = ({
         <div className="footer">
           <div className="total">
             <p>TotalAmount:</p>
-            <h3>{totalFee ? totalFee : 0} INR</h3>
+            <h3>
+              {feeValue && feeAmount && totalFee
+                ? Number(totalFee) + Number(feeAmount)
+                : feeValue && feeAmount && !totalFee
+                ? feeAmount
+                : totalFee
+                ? totalFee
+                : 0}{" "}
+              INR
+            </h3>
           </div>
           <div className="button">
             <Button variant="secondary" onClick={() => navigate(-1)}>

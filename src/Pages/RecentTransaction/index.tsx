@@ -20,9 +20,6 @@ import {
   pdf,
 } from "@react-pdf/renderer";
 
-const EntriesPerPage = 5;
-let totalDatasRendered = 0;
-
 type FeeDetail = {
   reciptNo: string;
   name: string;
@@ -43,48 +40,113 @@ const RecentTransaction = () => {
   const [searchData, setSearchData] = useState("");
   const [selectFee, setSelectFee] = useState("");
   const [openFee, setOpenFee] = useState(false);
-  const [totalData, setotalData] = useState(0);
-  const [totalArray, setTotalArray] = useState([]);
-  console.log(totalArray);
+  const [reciptFil, setReciptFil] = useState();
 
-  const onPageChange = (pageNumber: React.SetStateAction<number>) => {
-    setCurrentPage(pageNumber);
-    totalDatasRendered = 0;
-  };
+  const [itemsPerPage, setItemsPerPage] = useState(10); // Change this to the desired items per page
 
-  const renderPageNumbers = () => {
-    const totalPages = Math.ceil(data.length / EntriesPerPage);
-    const pages = [];
-    for (let i = 1; i <= totalPages; i++) {
-      pages.push(
-        <li
-          key={i}
-          onClick={() => onPageChange(i)}
-          className={currentPage === i ? "active" : ""}
+  // Flatten the filtered data
+  const flattenedData =
+    filterData.length > 0
+      ? filterData.flatMap((f) =>
+          f.feeDetails
+            .filter((d) => d.state === true)
+            .map((s) => ({
+              ...s,
+              studentName: f.student.nameInEnglish,
+              admissionNo: f.admission.admissionNo,
+              grade: f.admission.grade,
+              id: f.id,
+            }))
+        )
+      : data.flatMap((f) =>
+          f.feeDetails
+            .filter((d) => d.state === true)
+            .map((s) => ({
+              ...s,
+              studentName: f.student.nameInEnglish,
+              admissionNo: f.admission.admissionNo,
+              grade: f.admission.grade,
+              id: f.id,
+            }))
+        );
+
+  // Calculate total pages
+  const totalPages = Math.ceil(flattenedData.length / itemsPerPage);
+  const renderPagination = () => {
+    const pageButtons = [];
+    const ellipsis = <span key="ellipsis">...</span>;
+
+    if (totalPages <= 5) {
+      // If total pages are less than or equal to 5, show all page numbers
+      for (let i = 1; i <= totalPages; i++) {
+        pageButtons.push(
+          <button
+            key={i}
+            onClick={() => handlePageChange(i)}
+            className={currentPage === i ? "active" : ""}
+          >
+            {i}
+          </button>
+        );
+      }
+    } else {
+      // Show the first page, ellipsis, and last 5 pages
+      pageButtons.push(
+        <button
+          key={1}
+          onClick={() => handlePageChange(1)}
+          className={currentPage === 1 ? "active" : ""}
         >
-          {i}
-        </li>
+          1
+        </button>
+      );
+
+      if (currentPage > 3) {
+        pageButtons.push(ellipsis);
+      }
+
+      const startPage = Math.max(2, currentPage - 1);
+      const endPage = Math.min(totalPages - 1, currentPage + 1);
+
+      for (let i = startPage; i <= endPage; i++) {
+        pageButtons.push(
+          <button
+            key={i}
+            onClick={() => handlePageChange(i)}
+            className={currentPage === i ? "active" : ""}
+          >
+            {i}
+          </button>
+        );
+      }
+
+      if (currentPage < totalPages - 2) {
+        pageButtons.push(ellipsis);
+      }
+
+      pageButtons.push(
+        <button
+          key={totalPages}
+          onClick={() => handlePageChange(totalPages)}
+          className={currentPage === totalPages ? "active" : ""}
+        >
+          {totalPages}
+        </button>
       );
     }
-    return pages;
+
+    return pageButtons;
   };
 
-  const totalPages = Math.ceil(totalData / EntriesPerPage);
-
-  const handlePrevPage = () => {
-    if (currentPage > 1) {
-      setCurrentPage(currentPage - 1);
-    }
+  // Handle page change
+  const handlePageChange = (page: React.SetStateAction<number>) => {
+    setCurrentPage(page);
   };
 
-  const handleNextPage = () => {
-    if (currentPage < totalPages) {
-      setCurrentPage(currentPage + 1);
-    }
-  };
-
-  const startIndex = (currentPage - 1) * EntriesPerPage;
-  const endIndex = currentPage * EntriesPerPage;
+  // Get current items
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = flattenedData.slice(indexOfFirstItem, indexOfLastItem);
 
   function determineInputType(input: string): string {
     // Check if input is empty or just whitespace
@@ -101,143 +163,143 @@ const RecentTransaction = () => {
     return "string";
   }
 
-  useEffect(() => {
-    console.log("Filter");
-    if (
-      searchDateOfAdmission === "" &&
-      searchDateToAdmission === "" &&
-      selectFee === "" &&
-      selectGrade === "" &&
-      searchData === ""
-    ) {
-      setFilterData([]);
-      return;
-    }
+  // useEffect(() => {
+  //   console.log("Filter");
+  //   if (
+  //     searchDateOfAdmission === "" &&
+  //     searchDateToAdmission === "" &&
+  //     selectFee === "" &&
+  //     selectGrade === "" &&
+  //     searchData === ""
+  //   ) {
+  //     setFilterData([]);
+  //     return;
+  //   }
 
-    let tempData = data;
+  //   let tempData = data;
 
-    if (searchData !== "") {
-      tempData = data
-        .filter((item) => {
-          console.log(searchData.toLowerCase());
-          if (determineInputType(searchData) !== "number") {
-            return item.student.nameInEnglish
-              .toLowerCase()
-              .startsWith(searchData.toLowerCase());
-          } else return item;
-        })
-        .filter((item) => {
-          if (determineInputType(searchData) === "number") {
-            return String(item.admission.admissionNo).startsWith(searchData);
-          } else return item;
-        })
-        .map((item: any) => {
-          console.log(item);
-          // Filter feeDetails based on the condition
-          let filteredFeeDetails = item.feeDetails.filter(
-            (feeDetail: FeeDetail) => {
-              if (
-                searchData.length > 3 &&
-                determineInputType(searchData) === "number"
-              ) {
-                return String(feeDetail.reciptNo).startsWith(searchData);
-              } else return feeDetail;
-            }
-          );
+  //   if (searchData !== "") {
+  //     tempData = data
+  //       .filter((item) => {
+  //         console.log(searchData.toLowerCase());
+  //         if (determineInputType(searchData) !== "number") {
+  //           return item.student.nameInEnglish
+  //             .toLowerCase()
+  //             .startsWith(searchData.toLowerCase());
+  //         } else return item;
+  //       })
+  //       .filter((item) => {
+  //         if (determineInputType(searchData) === "number") {
+  //           return String(item.admission.admissionNo).startsWith(searchData);
+  //         } else return item;
+  //       })
+  //       .map((item: any) => {
+  //         console.log(item);
+  //         // Filter feeDetails based on the condition
+  //         let filteredFeeDetails = item.feeDetails.filter(
+  //           (feeDetail: FeeDetail) => {
+  //             if (
+  //               searchData.length > 3 &&
+  //               determineInputType(searchData) === "number"
+  //             ) {
+  //               return String(feeDetail.reciptNo).startsWith(searchData);
+  //             } else return feeDetail;
+  //           }
+  //         );
 
-          // Replace the feeDetails array with the filtered array
-          return {
-            ...item,
-            feeDetails: filteredFeeDetails,
-          };
-        });
-    }
-    if (searchDateOfAdmission !== "") {
-      // Parse the searchDateOfAdmission once to avoid repeated parsing in the loop
-      const searchDateTimestamp = moment(
-        `${searchDateOfAdmission} 00:00:00`,
-        "YYYY-MM-DD HH:mm:ss"
-      ).valueOf();
+  //         // Replace the feeDetails array with the filtered array
+  //         return {
+  //           ...item,
+  //           feeDetails: filteredFeeDetails,
+  //         };
+  //       });
+  //   }
+  //   if (searchDateOfAdmission !== "") {
+  //     // Parse the searchDateOfAdmission once to avoid repeated parsing in the loop
+  //     const searchDateTimestamp = moment(
+  //       `${searchDateOfAdmission} 00:00:00`,
+  //       "YYYY-MM-DD HH:mm:ss"
+  //     ).valueOf();
 
-      // Iterate over each item in tempData
-      tempData = tempData.map((item: any) => {
-        // Filter feeDetails based on the condition
-        const filteredFeeDetails = item.feeDetails.filter((feeDetail: any) => {
-          return feeDetail.updatedDate > searchDateTimestamp;
-        });
+  //     // Iterate over each item in tempData
+  //     tempData = tempData.map((item: any) => {
+  //       // Filter feeDetails based on the condition
+  //       const filteredFeeDetails = item.feeDetails.filter((feeDetail: any) => {
+  //         return feeDetail.updatedDate > searchDateTimestamp;
+  //       });
 
-        // Replace the feeDetails array with the filtered array
-        return {
-          ...item,
-          feeDetails: filteredFeeDetails,
-        };
-      });
+  //       // Replace the feeDetails array with the filtered array
+  //       return {
+  //         ...item,
+  //         feeDetails: filteredFeeDetails,
+  //       };
+  //     });
 
-      // Log the updated tempData for debugging purposes
-      // tempData.forEach((element: any) => {
-      //   console.log(element.feeDetails);
-      // });
-    }
-    if (searchDateToAdmission !== "") {
-      // Parse the searchDateOfAdmission once to avoid repeated parsing in the loop
-      const searchDateTimestamp = moment(
-        `${searchDateToAdmission} 23:59:59`,
-        "YYYY-MM-DD HH:mm:ss"
-      ).valueOf();
+  //     // Log the updated tempData for debugging purposes
+  //     // tempData.forEach((element: any) => {
+  //     //   console.log(element.feeDetails);
+  //     // });
+  //   }
+  //   if (searchDateToAdmission !== "") {
+  //     // Parse the searchDateOfAdmission once to avoid repeated parsing in the loop
+  //     const searchDateTimestamp = moment(
+  //       `${searchDateToAdmission} 23:59:59`,
+  //       "YYYY-MM-DD HH:mm:ss"
+  //     ).valueOf();
 
-      // Iterate over each item in tempData
-      tempData = tempData.map((item: any) => {
-        // Filter feeDetails based on the condition
-        const filteredFeeDetails = item.feeDetails.filter((feeDetail: any) => {
-          return feeDetail.updatedDate < searchDateTimestamp;
-        });
+  //     // Iterate over each item in tempData
+  //     tempData = tempData.map((item: any) => {
+  //       // Filter feeDetails based on the condition
+  //       const filteredFeeDetails = item.feeDetails.filter((feeDetail: any) => {
+  //         return feeDetail.updatedDate < searchDateTimestamp;
+  //       });
 
-        // Replace the feeDetails array with the filtered array
-        return {
-          ...item,
-          feeDetails: filteredFeeDetails,
-        };
-      });
-    }
+  //       // Replace the feeDetails array with the filtered array
+  //       return {
+  //         ...item,
+  //         feeDetails: filteredFeeDetails,
+  //       };
+  //     });
+  //   }
 
-    if (selectFee !== "") {
-      console.log("Fee Filtering...");
-      // Iterate over each item in tempData
-      tempData = tempData.map((item: any) => {
-        // Filter feeDetails based on the condition
+  //   if (selectFee !== "") {
+  //     console.log("Fee Filtering...");
+  //     // Iterate over each item in tempData
+  //     tempData = tempData.map((item: any) => {
+  //       // Filter feeDetails based on the condition
 
-        const filteredFeeDetails = item.feeDetails.filter(
-          (feeDetail: FeeDetail) => {
-            // if (selectFee.split("_", 1)[0] === "customfee")
-            return feeDetail.name.toLowerCase() === selectFee.toLowerCase();
-          }
-        );
+  //       const filteredFeeDetails = item.feeDetails.filter(
+  //         (feeDetail: FeeDetail) => {
+  //           // if (selectFee.split("_", 1)[0] === "customfee")
+  //           return feeDetail.name.toLowerCase() === selectFee.toLowerCase();
+  //         }
+  //       );
 
-        // Replace the feeDetails array with the filtered array
-        return {
-          ...item,
-          feeDetails: filteredFeeDetails,
-        };
-      });
-    }
-    if (selectGrade !== "") {
-      tempData = tempData.filter(
-        (item: any) =>
-          item.admission.grade.toLowerCase() === selectGrade.toLowerCase()
-      );
-    }
+  //       // Replace the feeDetails array with the filtered array
+  //       return {
+  //         ...item,
+  //         feeDetails: filteredFeeDetails,
+  //       };
+  //     });
+  //   }
+  //   if (selectGrade !== "") {
+  //     tempData = tempData.filter(
+  //       (item: any) =>
+  //         item.admission.grade.toLowerCase() === selectGrade.toLowerCase()
+  //     );
+  //   }
 
-    console.log(tempData);
+  //   console.log(tempData);
 
-    setFilterData(tempData);
-    // Log the updated tempData for debugging purposes
-  }, [
-    searchDateOfAdmission,
-    searchDateToAdmission,
-    selectGrade,
-    selectFee,
-    searchData,
-  ]);
+  //   setFilterData(tempData);
+  //   // Log the updated tempData for debugging purposes
+  // }, [
+  //   searchDateOfAdmission,
+  //   searchDateToAdmission,
+  //   selectGrade,
+  //   selectFee,
+  //   searchData,
+  // ]);
 
   const getData = useCallback(async () => {
     const q = query(collection(db, "NewAdmission"));
@@ -260,12 +322,172 @@ const RecentTransaction = () => {
   }, [getData]);
 
   const handleSearchFilter = async () => {
-    setFilterData([]);
-    setSelectGrade("");
-    setSearchDateOfSubmision("");
-    setSearchDateToSubmision("");
-    setSelectFee("");
-    setSearchData("");
+    try {
+      console.log("Filter");
+      if (
+        searchDateOfAdmission === "" &&
+        searchDateToAdmission === "" &&
+        selectFee === "" &&
+        selectGrade === "" &&
+        searchData === ""
+      ) {
+        setFilterData([]);
+        return;
+      }
+
+      let tempData = data;
+
+      // if (reciptFil) {
+      //   tempData;
+      // }
+
+      if (searchData !== "") {
+        if (searchData.slice(0, 2) === "IS") {
+          tempData = tempData.map((item: any) => {
+            // Filter feeDetails based on the condition
+
+            const filteredFeeDetails = item.feeDetails.filter(
+              (feeDetail: FeeDetail) => {
+                // if (selectFee.split("_", 1)[0] === "customfee")
+                return String(feeDetail.reciptNo).startsWith(searchData);
+              }
+            );
+            // Replace the feeDetails array with the filtered array
+            return {
+              ...item,
+              feeDetails: filteredFeeDetails,
+            };
+          });
+        } else {
+          tempData = data
+            .filter((item) => {
+              console.log(searchData.toLowerCase());
+              if (determineInputType(searchData) !== "number") {
+                return item.student.nameInEnglish
+                  .toLowerCase()
+                  .startsWith(searchData.toLowerCase());
+              } else return item;
+            })
+            .filter((item) => {
+              if (determineInputType(searchData) === "number") {
+                return String(item.admission.admissionNo).startsWith(
+                  searchData
+                );
+              } else return item;
+            })
+            .map((item: any) => {
+              console.log(item);
+              // Filter feeDetails based on the condition
+              let filteredFeeDetails = item.feeDetails.filter(
+                (feeDetail: FeeDetail) => {
+                  if (
+                    searchData.length > 3 &&
+                    determineInputType(searchData) === "number"
+                  ) {
+                    return String(feeDetail.reciptNo).startsWith(searchData);
+                  } else return feeDetail;
+                }
+              );
+
+              // Replace the feeDetails array with the filtered array
+              return {
+                ...item,
+                feeDetails: filteredFeeDetails,
+              };
+            });
+        }
+      }
+      if (searchDateOfAdmission !== "") {
+        // Parse the searchDateOfAdmission once to avoid repeated parsing in the loop
+        const searchDateTimestamp = moment(
+          `${searchDateOfAdmission} 00:00:00`,
+          "YYYY-MM-DD HH:mm:ss"
+        ).valueOf();
+
+        // Iterate over each item in tempData
+        tempData = tempData.map((item: any) => {
+          // Filter feeDetails based on the condition
+          const filteredFeeDetails = item.feeDetails.filter(
+            (feeDetail: any) => {
+              return feeDetail.updatedDate > searchDateTimestamp;
+            }
+          );
+
+          // Replace the feeDetails array with the filtered array
+          return {
+            ...item,
+            feeDetails: filteredFeeDetails,
+          };
+        });
+
+        // Log the updated tempData for debugging purposes
+        // tempData.forEach((element: any) => {
+        //   console.log(element.feeDetails);
+        // });
+      }
+      if (searchDateToAdmission !== "") {
+        // Parse the searchDateOfAdmission once to avoid repeated parsing in the loop
+        const searchDateTimestamp = moment(
+          `${searchDateToAdmission} 23:59:59`,
+          "YYYY-MM-DD HH:mm:ss"
+        ).valueOf();
+
+        // Iterate over each item in tempData
+        tempData = tempData.map((item: any) => {
+          // Filter feeDetails based on the condition
+          const filteredFeeDetails = item.feeDetails.filter(
+            (feeDetail: any) => {
+              return feeDetail.updatedDate < searchDateTimestamp;
+            }
+          );
+
+          // Replace the feeDetails array with the filtered array
+          return {
+            ...item,
+            feeDetails: filteredFeeDetails,
+          };
+        });
+      }
+
+      if (selectFee !== "") {
+        console.log("Fee Filtering...");
+        // Iterate over each item in tempData
+        tempData = tempData.map((item: any) => {
+          // Filter feeDetails based on the condition
+
+          const filteredFeeDetails = item.feeDetails.filter(
+            (feeDetail: FeeDetail) => {
+              // if (selectFee.split("_", 1)[0] === "customfee")
+              return feeDetail.name.toLowerCase() === selectFee.toLowerCase();
+            }
+          );
+
+          // Replace the feeDetails array with the filtered array
+          return {
+            ...item,
+            feeDetails: filteredFeeDetails,
+          };
+        });
+      }
+      if (selectGrade !== "") {
+        tempData = tempData.filter(
+          (item: any) =>
+            item.admission.grade.toLowerCase() === selectGrade.toLowerCase()
+        );
+      }
+
+      console.log(tempData);
+
+      setFilterData(tempData);
+    } catch (error) {
+      console.log(error);
+    }
+    // setFilterData([]);
+    // setSelectGrade("");
+    // setSearchDateOfSubmision("");
+    // setSearchDateToSubmision("");
+    // setSelectFee("");
+    // setSearchData("");
   };
 
   const downloadStatement = async () => {
@@ -277,6 +499,7 @@ const RecentTransaction = () => {
               <Text style={styles.heading}>RECEIPT NO.</Text>
               <Text style={styles.heading}>PAID DATE</Text>
               <Text style={styles.heading}>NAME</Text>
+              <Text style={styles.heading}>GRADE</Text>
               <Text style={styles.heading}>ADMISSION NO.</Text>
               <Text style={styles.heading}>SESSION</Text>
               <Text style={styles.heading}>AMOUNT</Text>
@@ -295,6 +518,7 @@ const RecentTransaction = () => {
                           <Text style={styles.text}>
                             {f.student.nameInEnglish}
                           </Text>
+                          <Text style={styles.text}>{f.admission.grade}</Text>
                           <Text style={styles.text}>
                             {f.admission.admissionNo}
                           </Text>
@@ -318,6 +542,7 @@ const RecentTransaction = () => {
                           <Text style={styles.text}>
                             {f.student.nameInEnglish}
                           </Text>
+                          <Text style={styles.text}>{f.admission.grade}</Text>
                           <Text style={styles.text}>
                             {f.admission.admissionNo}
                           </Text>
@@ -336,17 +561,6 @@ const RecentTransaction = () => {
       console.log(error);
     }
   };
-  let newArray: any = [];
-  let length = 0;
-
-  useEffect(() => {
-    data.forEach((f) => f.feeDetails.forEach((f2) => newArray.push(f2)));
-    console.log(newArray);
-    length = newArray.length;
-    console.log("newArray", length);
-    setotalData(newArray.length);
-    setTotalArray(newArray);
-  }, [data, totalData, data]);
 
   return (
     <div className="recent-transaction-container">
@@ -385,6 +599,7 @@ const RecentTransaction = () => {
                   <th>RECEIPT NO.</th>
                   <th>PAID DATE</th>
                   <th>NAME</th>
+                  <th>GRADE</th>
                   <th>ADMISSION NO.</th>
                   <th>SESSION</th>
                   <th>AMOUNT</th>
@@ -393,72 +608,27 @@ const RecentTransaction = () => {
               </thead>
 
               <tbody>
-                {filterData.length !== 0
-                  ? filterData.map((f, i) =>
-                      f.feeDetails
-                        .filter((d) => d.state === true)
-                        .slice(startIndex, endIndex)
-                        .map((s, index) => (
-                          <tr key={i && index + 1}>
-                            <td>{s.reciptNo}</td>
-                            <td>
-                              {moment(s.updatedDate).format("MMM DD, YYYY")}
-                            </td>
-                            <td>{f.student.nameInEnglish}</td>
-                            <td>{f.admission.admissionNo}</td>
-                            <td>{s.name}</td>
-                            <td>{s.amount} INR</td>
-                            <td
-                              style={{
-                                textDecoration: "underline",
-                                cursor: "pointer",
-                                color: "#455A64",
-                              }}
-                              onClick={() =>
-                                navigate(`/paymenthistory/${f.id}`)
-                              }
-                            >
-                              View
-                            </td>
-                          </tr>
-                        ))
-                    )
-                  : data.map((f, i) => {
-                      return f.feeDetails
-                        .filter((d) => d.state === true)
-                        .map((s, index) => {
-                          console.log(totalDatasRendered);
-                          if (
-                            totalDatasRendered > startIndex &&
-                            totalDatasRendered < endIndex
-                          )
-                            return (
-                              <tr key={i && index + 1}>
-                                <td>{s.reciptNo}</td>
-                                <td>
-                                  {moment(s.updatedDate).format("MMM DD, YYYY")}
-                                </td>
-                                <td>{f.student.nameInEnglish}</td>
-                                <td>{f.admission.admissionNo}</td>
-                                <td>{s.name}</td>
-                                <td>{s.amount} INR</td>
-                                <td
-                                  style={{
-                                    textDecoration: "underline",
-                                    cursor: "pointer",
-                                    color: "#455A64",
-                                  }}
-                                  onClick={() =>
-                                    navigate(`/paymenthistory/${f.id}`)
-                                  }
-                                >
-                                  View
-                                </td>
-                              </tr>
-                            );
-                          totalDatasRendered++;
-                        });
-                    })}
+                {currentItems.map((s, index) => (
+                  <tr key={index}>
+                    <td>{s.reciptNo}</td>
+                    <td>{moment(s.updatedDate).format("MMM DD, YYYY")}</td>
+                    <td>{s.studentName}</td>
+                    <td>{s.grade}</td>
+                    <td>{s.admissionNo}</td>
+                    <td>{s.name}</td>
+                    <td>{s.amount} INR</td>
+                    <td
+                      style={{
+                        textDecoration: "underline",
+                        cursor: "pointer",
+                        color: "#455A64",
+                      }}
+                      onClick={() => navigate(`/paymenthistory/${s.id}`)}
+                    >
+                      View
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
@@ -470,23 +640,21 @@ const RecentTransaction = () => {
                   fontSize: "14px",
                 }}
               >
-                page
+                Page
               </p>
-              <ul className="pagination">
-                <li
-                  className={currentPage === 1 ? "disabled" : ""}
-                  onClick={handlePrevPage}
-                >
-                  Prev
-                </li>
-                {renderPageNumbers()}
-                <li
-                  className={currentPage === totalPages ? "disabled" : ""}
-                  onClick={handleNextPage}
-                >
-                  Next
-                </li>
-              </ul>
+
+              <div className="paginations">
+                {/* {Array.from({ length: totalPages }, (_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => handlePageChange(index + 1)}
+                    className={currentPage === index + 1 ? "active" : ""}
+                  >
+                    {index + 1}
+                  </button>
+                ))} */}
+                {renderPagination()}
+              </div>
             </div>
             <div className="download">
               <Button
@@ -514,6 +682,7 @@ const styles = StyleSheet.create({
     // justifyContent: "center",
     // flexDirection: "column",
     gap: "32px",
+
     // marginTop: "-70px",
   },
   heading: {

@@ -62,16 +62,16 @@ export const validationSchema = Yup.object().shape({
     })
   ),
   previousStudy: Yup.object().shape({
-    instituteName: Yup.string().required("Required"),
-    academicYear: Yup.string().required("Required"),
-    class: Yup.string().required("Required"),
-    medium: Yup.string().required("Required"),
-    matric: Yup.string().required("Required"),
+    instituteName: Yup.string(),
+    academicYear: Yup.string(),
+    class: Yup.string(),
+    medium: Yup.string(),
+    matric: Yup.string(),
     marks: Yup.string(),
   }),
   upload: Yup.object().shape({
-    transferCertificate: Yup.string().required("Required"),
-    studentPhoto: Yup.string().required("Required"),
+    transferCertificate: Yup.string(),
+    studentPhoto: Yup.string(),
     birthCertificate: Yup.string(),
     tenthMarksheet: Yup.string(),
   }),

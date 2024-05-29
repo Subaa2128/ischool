@@ -10,14 +10,14 @@
       padding: 40px;
       text-align: center;
       .fee-recipt {
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        // display: flex;
+        // align-items: center;
+        // justify-content: center;
         h2 {
-          border: 1px solid var(--border-primary);
-          padding: 8px 24px;
-          margin-top: 24px;
-          width: fit-content;
+          // border: 1px solid var(--border-primary);
+          // padding: 8px 24px;
+          // margin-top: 24px;
+          // width: fit-content;
         }
       }
 
@@ -26,14 +26,14 @@
         border-top: 1px solid var(--border-primary);
       }
       .recipt-details {
-        display: grid;
-        grid-template-columns: 1fr 1fr 1fr;
-        column-gap: 20px;
-        row-gap: 16px;
         .recipt-detail {
-          display: flex;
-          flex-direction: column;
-          align-items: flex-start;
+          display: grid;
+          grid-template-columns: 1.1fr 1fr;
+          flex-direction: row;
+          align-items: center;
+          justify-items: flex-start;
+          padding-top: 10px;
+          gap: 10px;
           h3 {
             text-align: left;
           }
@@ -41,13 +41,16 @@
       }
       .admision-details {
         .detail {
-          display: flex;
+          display: grid;
+          grid-template-columns: 0.37fr 1fr;
+          flex-direction: row;
           align-items: center;
-          justify-content: space-between;
-          gap: 8px;
+          justify-items: flex-start;
+          padding-top: 10px;
+          gap: 10px;
         }
         .border {
-          margin: 8px 0;
+          margin: 20px 0;
         }
       }
       .signature {

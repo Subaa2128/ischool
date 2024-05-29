@@ -83,4 +83,5 @@ export type INewAdmission = {
     }
   ];
   id?: string;
+  rteStudent?: boolean;
 };

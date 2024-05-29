@@ -71,11 +71,11 @@ const StudentProfile: React.FC<IStudentProfile> = ({ id }) => {
         </div>
         <div className="title">
           <p>Standard</p>
-          <h2>{data?.previousStudy.class}</h2>
+          <h2>{data?.admission.grade}</h2>
         </div>
 
         <div className="title">
-          <p>Acadamic Year</p>
+          <p>Academic Year</p>
           <h2>{data?.admission.academicYear}</h2>
         </div>
 

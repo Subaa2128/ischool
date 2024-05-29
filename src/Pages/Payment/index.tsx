@@ -26,9 +26,6 @@ const Payment = () => {
 
   const handleSubmit = async (values: typeof initialValues) => {
     try {
-      if (!values.admissionNumber && !values.name) {
-        return setErrorMessage("Enter either Admission number or Name");
-      }
       const q = query(collection(db, "NewAdmission"));
       const querySnapshot = await getDocs(q);
       const fetchedData = querySnapshot.docs.map((doc) => ({
@@ -36,12 +33,14 @@ const Payment = () => {
         ...(doc.data() as Omit<INewAdmission, "id">),
       }));
       console.log(fetchedData);
+      console.log(values.admissionNumber);
+
       if (values.admissionNumber) {
         const filteredData = fetchedData.find(
           (f) =>
-            f.admission.admissionNo.toLowerCase() ===
-            values.admissionNumber.toLowerCase()
+            Number(f.admission.admissionNo) === Number(values.admissionNumber)
         );
+        console.log(filteredData?.id);
         if (filteredData?.id) {
           navigate(`/paymenthistory/${filteredData?.id}`);
         }
@@ -56,6 +55,9 @@ const Payment = () => {
           navigate(`/paymenthistory/${filteredData?.id}`);
         }
         setErrorMessage("Name wasn't found");
+      }
+      if (!values.admissionNumber && !values.name) {
+        return setErrorMessage("Enter either Admission number or Name");
       }
     } catch (error) {
       console.log(error);

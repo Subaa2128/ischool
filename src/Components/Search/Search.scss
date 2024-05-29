@@ -28,6 +28,20 @@
   gap: 8px;
   display: flex;
   /* Your styling for filter options */
+  .calender {
+    border: 1px solid var(--border-primary);
+    display: flex;
+    align-items: center;
+    padding: 0 8px;
+    .border {
+      border-right: 1px solid var(--border-primary);
+      height: 20px;
+      padding-left: 5px;
+    }
+    input {
+      border: none;
+    }
+  }
   input {
     border: 1px solid var(--border-primary);
     padding: 8px 12px;
@@ -54,6 +68,9 @@
       padding: 8px 12px;
       position: relative;
       width: 200px;
+      p {
+        text-transform: capitalize;
+      }
     }
     .option {
       position: absolute;
@@ -70,6 +87,7 @@
         text-align: left;
         border-bottom: 1px solid #c7dce6;
         cursor: pointer;
+        text-transform: capitalize;
       }
     }
   }

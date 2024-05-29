@@ -9,6 +9,7 @@ import {
   addDoc,
   collection,
   doc,
+  getDoc,
   getDocs,
   query,
   updateDoc,
@@ -31,6 +32,7 @@ import {
   gender,
   matric,
   motherTongue,
+  medium,
 } from "./data";
 import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
 import { INewAdmission } from "../../utils/types";
@@ -57,6 +59,7 @@ const NewAdmission = () => {
   const [openGrade, setOpenGrade] = useState(false);
   const [openGender, setOpenGender] = useState(false);
   const [openMatric, setOpenMatric] = useState(false);
+  const [openMedium, setOpenMedium] = useState(false);
   const [openMotherTounge, setOpenMotherTounge] = useState(false);
   const [opencommunity, setOpenCommunity] = useState(false);
   const [openBrotherSister, setOpenBrootherSister] = useState(false);
@@ -106,6 +109,7 @@ const NewAdmission = () => {
           },
         ],
       });
+
       navigate(`/paymenthistory/${data.id}`);
       console.log(data);
     } catch (error) {
@@ -238,11 +242,16 @@ const NewAdmission = () => {
     try {
       console.log("update");
       if (!id) return;
-      const userDocRef = doc(db, "NewAdmission", id);
-      await updateDoc(userDocRef, {
-        ...values,
 
-        feeDetails: [
+      const userDocRef = doc(db, "NewAdmission", id);
+      const userDocSnap = await getDoc(userDocRef);
+
+      if (userDocSnap.exists()) {
+        const currentData = userDocSnap.data();
+        const currentFeeDetails = currentData.feeDetails;
+        console.log(currentFeeDetails);
+
+        const newFeeDetails = [
           {
             name: "admissionFee",
             updatedDate: Date.now(),
@@ -278,9 +287,17 @@ const NewAdmission = () => {
             state: false,
             reciptNo: "",
           },
-        ],
-      });
-      navigate(-1);
+        ];
+
+        await updateDoc(userDocRef, {
+          ...values,
+          feeDetails: feeAdmission !== "" ? newFeeDetails : currentFeeDetails,
+        });
+
+        navigate(-1);
+      } else {
+        console.log("No such document!");
+      }
     } catch (error) {
       console.log(error);
     }
@@ -965,7 +982,7 @@ const NewAdmission = () => {
                                 rightIcon={<DropDown />}
                                 onClick={() => setOpenMatric((m) => !m)}
                                 name="previousStudy.matric"
-                                placeholder="Matric"
+                                placeholder="Board"
                               />
                               {openMatric && (
                                 <div className="options">
@@ -990,11 +1007,34 @@ const NewAdmission = () => {
                               name="previousStudy.class"
                               placeholder="Class"
                             />
-                            <TextField
-                              name="previousStudy.medium"
-                              placeholder="Medium"
-                            />
-
+                            <div className="">
+                              <TextField
+                                style={{ cursor: "pointer" }}
+                                value={values.previousStudy.medium}
+                                rightIcon={<DropDown />}
+                                onClick={() => setOpenMedium((m) => !m)}
+                                name="previousStudy.medium"
+                                placeholder="Medium"
+                              />
+                              {openMedium && (
+                                <div className="options">
+                                  {medium.map((option, index) => (
+                                    <p
+                                      key={index}
+                                      onClick={() => {
+                                        setFieldValue(
+                                          "previousStudy.medium",
+                                          option.label
+                                        );
+                                        setOpenMedium(false);
+                                      }}
+                                    >
+                                      {option.label}
+                                    </p>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
                             <TextField
                               name="previousStudy.marks"
                               placeholder="Marks"

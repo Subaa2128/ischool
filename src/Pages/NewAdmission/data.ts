@@ -178,8 +178,12 @@ export const brotherSister = [
 ];
 
 export const matric = [
-  { value: "board", label: "Board" },
+  { value: "matric", label: "Matric" },
   { value: "cbse", label: "CBSE" },
   { value: "icse", label: "ICSE" },
   { value: "other", label: "Other" },
+];
+export const medium = [
+  { value: "Tamil", label: "Tamil" },
+  { value: "English", label: "English" },
 ];
